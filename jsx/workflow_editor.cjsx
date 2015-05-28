@@ -213,11 +213,12 @@ AnswerList = React.createClass
   componentDidUpdate: ->
     if (@state.removing) and (@props.inputs.type == 'single')
       # since jsPlumb's draggable cache's the old positions of the nodes update all offsets by hand
-      for ep in @props.eps.endpoints[1...]
+      for ep in @props.inputs.eps.endpoints[1...]
         # recaculate the node position based on the DOM element
         jp.revalidate(ep.elementId, null, true)
       # tell jsPlumb's dragManager to update the offsets
       jp.dragManager.updateOffsets('task_' + @props.inputs.number)
+      @setState({removing: false})
 
   createAnswer: (idx, text, N, getUuid) ->
     inputs =
