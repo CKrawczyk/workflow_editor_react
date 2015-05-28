@@ -1,0 +1,35 @@
+{
+  "name": "workflow_editor_react",
+  "version": "1.0.0",
+  "description": "workfow editor for Panoptes writen using react",
+  "main": "js/worflow_editor.js",
+  "dependencies": {
+    "bootstrap": "^3.3.4",
+    "jquery": "^2.1.4",
+    "jquery-ui": "^1.10.5",
+    "markdown-it": "^4.2.1",
+    "markdown-it-emoji": "^1.0.0",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "react": "^0.13.3",
+    "react-bootstrap": "^0.22.0"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.0",
+    "coffee-reactify": "^3.0.0",
+    "coffeeify": "^1.1.0",
+    "watchify": "^3.2.1"
+  },
+  "scripts": {
+    "build": "browserify --transform coffee-reactify --ignore-transform coffeeify jsx/workflow_editor.cjsx -o js/workflow_editor.js",
+    "watch": "watchify -t coffee-reactify jsx/workflow_editor.cjsx -o js/workflow_editor.js --debug --verbose",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Coleman Krawczyk",
+  "license": "MIT",
+  "browserify": {
+    "transform": [
+      "coffeeify"
+    ]
+  }
+}

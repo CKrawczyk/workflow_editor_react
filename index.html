@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <link type="text/css" rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="./node_modules/jquery-ui/themes/base/jquery-ui.css">
+    <link type="text/css" rel="stylesheet" href="./css/jsplumb.css">
+    <link type="text/css" rel="stylesheet" href="./css/style.css">
+    <!--<script src="./js/jquery-1.11.2.min.js"></script>
+    <script src="./js/jquery-ui.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>-->
+    <script src="./js/dom.jsPlumb-1.7.5.js"></script>
+  </head>
+  <body>
+
+    <div class="container-fluid" id="body_container">
+
+      <div class="row">
+        <div class="col-md-3" style="margin-top: 15px;">
+          <div class="input-group">
+            <span class="input-group-addon">
+              Add task
+            </span>
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" id="add_question">Question (single)</button>
+              <button class="btn btn-default" type="button" id="add_question_multi">Question (multiple)</button>
+              <button class="btn btn-default" type="button" id="add_drawing">Drawing</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="col-md-12" id="editor"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <h3>How to use:</h3>
+          <ul>
+            <li>Add a new task by clicking one of the three buttons at the top of the page</li>
+            <li>Move the task node by clicking and dragging anywhere you want (page auto scrolls)</li>
+            <li>The width of the task nodes can be resized</li>
+            <li>Enter the task's question into the top text box of the task node (this is a multi-line textarea)</li>
+            <li>Enter the task's help text by clicking the "Help Text" button</li>
+            <li>Add answers/tools to the task by entering them into the bottom text box (this is a multi-line textarea) and clicking the "+"</li>
+            <li>Edit answers/tools by clicking the "pencil" icon</li>
+            <li>Connect the tasks/answers with the next task by clicking and dragging the black dot to the right of the task/answer to the black dot on the left of the next task</li>
+            <li>Remvoe tasks/answers/tools by clicking the "x"</li>
+            <li>Click "Show workflow" to show the Panoptes JSON for the workflow (The positions of each task node on the page are also shown)</li>
+            <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-default" type="button" id="get_workflow">Show workflow</button>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-default" type="button" id="get_example1">Load example 1</button>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-default" type="button" id="get_example2">Load example 2</button>
+        </div>
+        <div class="col-md-2">
+          <input class="btn btn-default" type="button" onClick="history.go(0)" value="Clear">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <pre id="my_workflow">
+          </pre>
+        </div>
+        <div class="col-md-6">
+          <pre id="my_workflow_pos">
+          </pre>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="help_popover" style="display: none; width: 300px;">
+      <div class="row">
+        <div class="col-xs-12">
+          <textarea id="help_popover_text" rows="5" style="width: 100%; resize: none;"></textarea>
+        </div>
+        <div class="col-xs-12">
+          <div class="btn-group btn-group-justified" role="group">
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="save">Save</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="close">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit_answer_popover" style="display: none; width: 300px;">
+      <div class="row">
+        <div class="col-xs-12">
+          <textarea id="help_popover_text" rows="5" style="width: 100%; resize: none;"></textarea>
+        </div>
+        <div class="col-xs-12">
+          <div class="btn-group btn-group-justified" role="group">
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="save">Save</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="close">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="edit_tool_popover" style="display: none; width: 300px;">
+      <div class="row">
+        <div class="col-xs-12">
+          <textarea id="help_popover_text" rows="5" style="width: 100%; resize: none;"></textarea>
+        </div>
+        <div class="col-xs-6" style="padding-right: 0px;">
+          <select class="type-select2">
+            <option value="point">point</option>
+            <option value="line">line</option>
+            <option value="polygon">polygon</option>
+            <option value="rectangle">rectangle</option>
+            <option value="circle">circle</option>
+            <option value="ellipse">ellipse</option>
+          </select>
+        </div>
+        <div class="col-xs-6" style="padding-left: 0px;">
+          <select class="color-select2">
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="green">green</option>
+            <option value="blue">blue</option>
+            <option value="cyan">cyan</option>
+            <option value="magenta">magenta</option>
+            <option value="black">black</option>
+            <option value="white">white</option>
+          </select>
+        </div>
+        <div class="col-xs-12">
+          <div class="btn-group btn-group-justified" role="group">
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="save">Save</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button class="btn btn-default btn-sm" type="button" id="close">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./js/workflow_editor.js"></script>
+  </body>
+</html>

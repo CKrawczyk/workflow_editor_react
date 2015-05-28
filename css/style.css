@@ -1,0 +1,216 @@
+#editor {
+  width: 98%;
+  height: 800px;
+  border-style: solid;
+  border-width: 2px;
+  margin-top: 20px;
+  margin-left: 1%;
+  margin-right: 1%;
+  overflow: scroll;
+}
+
+.question {
+  z-index: auto;
+}
+
+.box,
+.box-end {
+  min-width: 180px;
+  max-width: 400px;
+  width: 200px;
+  background-color: #ccc;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 15px;
+  position: absolute;
+  overflow: none;
+}
+
+.question-box {
+  background-color: #b8d4a2;
+}
+
+.question-box > .drag-handel {
+  background-color: rgba(56,116,92,.3);
+}
+
+.multi-box {
+  background-color: #9ecfdf;
+}
+
+.multi-box > .drag-handel {
+  background-color: rgba(85,100,171,.3);
+}
+
+.drawing-box {
+  min-width: 190px;
+  background-color: #c5a8cc;
+}
+
+.drawing-box > .drag-handel {
+  background-color: rgba(183,96,133,.3);
+}
+
+.drag-handel {
+  padding-bottom: 10px;
+  cursor:  move;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  background-color: rgba(0,0,0,.3);
+}
+
+.req {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  float: right;
+  clear: both;
+}
+
+.task {
+  padding: 10px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  margin-top: 5px;
+}
+
+.answer-add {
+  padding: 10px;
+  /*padding-bottom: 0px;*/
+}
+
+.add-answer,
+.add-tool {
+  height: 46px;
+}
+
+.tool-add {
+  padding: 10px;
+}
+
+.answer-item {
+  padding-left: 15px;
+  padding-right: 15px;
+  clear: both;
+  width: 100%;
+}
+
+#end,
+#start {
+  min-width: 30px;
+  width: 75px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  z-index: 1;
+}
+
+.close-box {
+  margin-right: 10px;
+  color: #fff;
+  opacity: 0.5;
+  text-shadow: 0 1px 0 #000;
+}
+
+.close-box:focus, .close-box:hover {
+  color: #fff;
+  opacity: 0.7;
+}
+
+.box-head {
+  color: #fff;
+  opacity: 0.7;
+  float: left;
+  margin-left: 10px;
+  text-shadow: 0 1px 0 #000;
+}
+
+select.form-control {
+  padding: 0px;
+}
+
+.select-row {
+  margin: 0px;
+  margin-bottom: 10px;
+}
+
+.type-select {
+  padding-left: 10px;
+  padding-right: 5px;
+}
+
+.color-select {
+  padding-right: 10px;
+  padding-left: 5px;
+}
+
+.add-help {
+  margin-left: 10px;
+  margin-bottom: 5px;
+  width: 30%;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.checkbox {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.form-group {
+  margin-bottom: 0px;
+}
+
+.lab {
+  padding: 0px;
+  margin: 0px;
+  padding-left: 15px;
+  background-color: rgba(255,255,255,.5);
+  border: none
+}
+
+textarea.form-control {
+  padding: 2px 4px;
+  resize: none;
+}
+
+.help-text {
+  width: 100%;
+  resize: none;
+  margin-bottom: 10px;
+}
+
+.help-popover {
+  width: 300px;
+}
+
+.edit-popover {
+  width: 300px;
+}
+
+._jsPlumb_connector {
+  z-index: 0;
+}
+
+.close {
+  line-height: 0.65;
+}
+
+.edit-icon {
+  float: right;
+  opacity: 0.3;
+}
+
+.edit-icon:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+path, ._jsPlumb_endpoint {
+  cursor: pointer;
+}
+
+.ui-resizable-e {
+  cursor: ew-resize;
+}
