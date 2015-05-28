@@ -329,6 +329,7 @@ Task = React.createClass
         uuid: 0
         uuids: []
         type: @props.type
+        idx: @props.idx
       }
     else
       if @props.type == 'single'
@@ -354,6 +355,7 @@ Task = React.createClass
         uuid: 0
         uuids: []
         type: @props.type
+        idx: @props.idx
       }
 
   componentDidMount: ->
@@ -581,7 +583,7 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
+    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
       <div className='drag-handel'>
         <span className='box-head'>
           Single
@@ -614,7 +616,7 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
+    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
       <div className='drag-handel'>
         <span className='box-head'>
           Multiple
@@ -651,7 +653,7 @@ Task = React.createClass
       editDrawType: @onEditDrawType
       editDrawColor: @onEditDrawColor
 
-    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
+    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
       <div className='drag-handel'>
         <span className='box-head'>
           Drawing
@@ -674,74 +676,92 @@ Task = React.createClass
       when 'drawing' then return @renderDraw()
 #
 
+# Handel the full workflow
+Workflow = React.createClass
+  displayName: 'Workflow'
+
+  getInitialState: ->
+    wf = @props.wf ? {}
+    pos = @props.pos ? {}
+    {
+      wf: wf
+      pos: pos
+    }
+
+  createTask: (idx, task) ->
+    idx_num = @counter
+    @counter += 1
+    id = 'task_' + idx_num
+    <Task task={task} type={task.type} taskNumber={idx_num} pos={@state.pos[idx]} plumbId={id} key={id} idx={idx} />
+
+  render: ->
+    @counter = 0
+    <div>
+      {@createTask(idx, task) for idx, task of @state.wf}
+    </div>
+
 # Some example input for testing
-example_task = {
-  "question": "Is it a cat or bacon?",
-  "help": "Some example help text!",
-  "required": true,
-  "type": "single",
-  "answers": [
-    {
-      "label": "cat",
-      "next": "T1"
-    },
-    {
-      "label": "bacon",
-      "next": "T2"
-    }
-  ]
+wf = {
+  "T0": {
+    "question": "Is it a cat or bacon?",
+    "help": "Some example help text!",
+    "required": true,
+    "type": "single",
+    "answers": [
+      {
+        "label": "cat",
+        "next": "T1"
+      },
+      {
+        "label": "bacon",
+        "next": "T2"
+      }
+    ]
+  },
+  "T1": {
+    "question": "Is it cute?",
+    "help": "",
+    "type": "multiple",
+    "next": "T3"
+    "answers": [
+      {
+        "label": "yes",
+      },
+      {
+        "label": "no",
+      }
+    ]
+  },
+  "T2": {
+    "question": "Click the cat",
+    "help": "",
+    "type": "drawing",
+    "tools": [
+      {
+        "label": "CAT!",
+        "type": "point",
+        "color": "red"
+      }
+    ]
+  }
 }
 
-p1 = {
-  "top": 221,
-  "left": 275,
-  "width": 200
+pos = {
+  "T0": {
+    "top": 221,
+    "left": 275,
+    "width": 200
+  },
+  "T1": {
+    "top": 86,
+    "left": 669.65,
+    "width": 200
+  },
+  "T2": {
+    "top": 104,
+    "left": 1050,
+    "width": 246
+  }
 }
 
-example_task_2 = {
-  "question": "Is it cute?",
-  "help": "",
-  "type": "multiple",
-  "next": "T3"
-  "answers": [
-    {
-      "label": "yes",
-    },
-    {
-      "label": "no",
-    }
-  ]
-}
-
-p2 = {
-  "top": 86,
-  "left": 669.65,
-  "width": 200
-}
-
-example_task_3 = {
-  "question": "Click the cat",
-  "help": "",
-  "type": "drawing",
-  "tools": [
-    {
-      "label": "CAT!",
-      "type": "point",
-      "color": "red"
-    }
-  ]
-}
-
-p3 = {
-  "top": 104,
-  "left": 1050,
-  "width": 246
-}
-
-React.render(
-  <div>
-    <Task task={example_task} type={example_task.type} taskNumber={0} pos={p1} plumbId='task_0' />
-    <Task task={example_task_2} type={example_task_2.type} taskNumber={1} pos={p2} plumbId='task_1' />
-    <Task task={example_task_3} type={example_task_3.type} taskNumber={2} pos={p3} plumbId='task_2' />
-  </div>,
-  document.getElementById('editor'))
+React.render(<Workflow wf={wf} pos={pos} />, document.getElementById('editor'))
