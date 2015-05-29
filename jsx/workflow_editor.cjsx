@@ -305,16 +305,11 @@ Task = React.createClass
       answers = (a.label for a in @props.task.answers)
       draw_types = []
       draw_colors = []
-    if @props.type == 'single'
-      next = (a.next for a in @props.task.answers)
-    else
-      next = @props.task.next
     if @props.task
       {
         answers: answers
         draw_types: draw_types
         draw_colors: draw_colors
-        next: next
         answer_text: ''
         draw_type: 'point'
         draw_color: 'red'
@@ -332,15 +327,10 @@ Task = React.createClass
         idx: @props.idx
       }
     else
-      if @props.type == 'single'
-        next = []
-      else
-        next = undefined
       {
         answers: []
         draw_types: []
         draw_colors: []
-        next: next
         answer_text: ''
         draw_type: 'point'
         draw_color: 'red'
@@ -709,6 +699,23 @@ Workflow = React.createClass
       uuids: uuids
     }
 
+  # Draw any existing connectors
+  componentDidMount: ->
+    for wfKey,w of wf
+      idx = @state.keys.indexOf(wfKey)
+      switch w.type
+        when 'single'
+          for a,adx in w.answers
+            if a.next?
+              ndx = @state.keys.indexOf(a.next)
+              c = [@state.uuids[idx] + '_answer_' + adx, @state.uuids[ndx]]
+              jp.connect({uuids: c})
+        else
+          if w.next?
+            ndx = @state.keys.indexOf(w.next)
+            c = [@state.uuids[idx] + '_next', @state.uuids[ndx]]
+            jp.connect({uuids: c})
+
   # Get a existing/new unique uuid to use for the task node (needed for jsPlumb)
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
     if uuids[idx]?
@@ -823,7 +830,7 @@ wf = {
     "question": "Is it cute?",
     "help": "",
     "type": "multiple",
-    "next": "T3"
+    "next": "T2"
     "answers": [
       {
         "label": "yes",
@@ -859,8 +866,8 @@ pos = {
     "width": 200
   },
   "T2": {
-    "top": 104,
-    "left": 1050,
+    "top": 265,
+    "left": 987,
     "width": 246
   }
 }
