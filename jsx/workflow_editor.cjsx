@@ -288,7 +288,7 @@ TypeColorSelect = React.createClass
     </Row>
 #
 
-# Global value that will be moved later on
+# Global value to track what the max z-index is
 max_z = 0
 
 # Make a task node
@@ -866,3 +866,4 @@ pos = {
 }
 
 React.render(<Workflow wf={wf} pos={pos} />, document.getElementById('insert'))
+#React.render(<Workflow />, document.getElementById('insert'))
