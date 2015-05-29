@@ -103,7 +103,7 @@
   height: 30px;
   line-height: 30px;
   text-align: center;
-  z-index: 1;
+  cursor: move;
 }
 
 .close-box {

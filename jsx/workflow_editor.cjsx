@@ -676,6 +676,42 @@ AddTaskButtons = React.createClass
       <Button onClick={@props.onDraw}>Drawing</Button>
     </ButtonGroup>
 
+StartEndNode = React.createClass
+  displayName: 'StartNode'
+
+  getInitialState: ->
+    {
+      zIndex: 1
+      ep: undefined
+    }
+
+  componentDidMount: ->
+    drag_options =
+      start: @onDrag
+    jp.draggable(@props.type, drag_options)
+    switch @props.type
+      when 'start' then ep = jp.addEndpoint(@props.type, commonA, {uuid: @props.type})
+      when 'end' then ep = jp.addEndpoint(@props.type, commonT, {uuid: @props.type})
+    ep.canvas.style['z-index'] = @state.zIndex
+    @setState({ep: ep})
+
+  onDrag: ->
+    if @state.zIndex < max_z
+      max_z += 1
+      @state.ep.canvas.style['z-index'] = max_z
+      @setState({zIndex: max_z})
+
+  render: ->
+    style =
+      top: '50%'
+      zIndex: @state.zIndex
+    switch @props.type
+      when 'start' then style['left'] = '0%'
+      when 'end' then style['right'] = '0%'
+    <div className='box-end' id={@props.type} style={style}>
+      {@props.type.charAt(0).toUpperCase() + @props.type.slice(1)}
+    </div>
+
 # Handel the full workflow
 Workflow = React.createClass
   displayName: 'Workflow'
@@ -698,7 +734,7 @@ Workflow = React.createClass
           delete pos['init']
           break
     else
-      init = null
+      init = undefined
     key_nums = (k[1...] for k in keys)
     if key_nums.length > 0
       uuid = Math.max(key_nums...) + 1
@@ -716,6 +752,10 @@ Workflow = React.createClass
 
   # Draw any existing connectors
   componentDidMount: ->
+    if @state.init?
+      idx = @state.keys.indexOf(@state.init)
+      c = ['start', @state.uuids[idx]]
+      jp.connect({uuids: c})
     for wfKey,w of wf
       idx = @state.keys.indexOf(wfKey)
       switch w.type
@@ -724,12 +764,16 @@ Workflow = React.createClass
             if a.next?
               ndx = @state.keys.indexOf(a.next)
               c = [@state.uuids[idx] + '_answer_' + adx, @state.uuids[ndx]]
-              jp.connect({uuids: c})
+            else
+              c = [@state.uuids[idx] + '_answer_' + adx, 'end']
+            jp.connect({uuids: c})
         else
           if w.next?
             ndx = @state.keys.indexOf(w.next)
             c = [@state.uuids[idx] + '_next', @state.uuids[ndx]]
-            jp.connect({uuids: c})
+          else
+            c = [@state.uuids[idx] + '_next', 'end']
+          jp.connect({uuids: c})
 
   # Get a existing/new unique uuid to use for the task node (needed for jsPlumb)
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
@@ -819,6 +863,8 @@ Workflow = React.createClass
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} className='editor'>
+        <StartEndNode type='start' />
+        <StartEndNode type='end' />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
     </Row>
