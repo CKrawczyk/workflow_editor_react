@@ -851,10 +851,23 @@ Workflow = React.createClass
   onNewDraw: (e) ->
     @makeNewTask('drawing')
 
+  # Construct workflow json from nodes
+  getWorkflow: ->
+    editor = document.getElementById('editor')
+    scrollLeft = editor.scrollLeft
+    scrollTop = editor.scrollTop
+    for k, kdx in @state.keys
+      switch @state.wf[k].type
+        when 'single'
+          console.log('todo')
+        else
+          id = @state.uuids[kdx]+ '_next'
+          console.log(id, jp.getConnections({source: id}))
+
   # Callback to make one task
   createTask: (idx, name) ->
     id = @getUuid(idx)
-    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} remove={@removeTask} />
+    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} />
 
   render: ->
     <Row>
@@ -862,11 +875,12 @@ Workflow = React.createClass
         <div style={{fontSize: 26}}> Add Task:</div>
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
-      <Col xs={12} className='editor'>
+      <Col xs={12} id='editor'>
         <StartEndNode type='start' />
         <StartEndNode type='end' />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
+      <Button onClick={@getWorkflow}> Get Workflow </Button>
     </Row>
 
 # Some example input for testing
