@@ -76,7 +76,7 @@ TaskName = React.createClass
     task_number = 'T ' + @props.number
     style =
       'zIndex': 'inherit'
-    <div className='task' id={'task_' + @props.number + '_name'}>
+    <div className='task' id={@props.plumbId + '_name'}>
       <Input className='question' type='textarea' onChange={@props.nameMe} value={@props.question} addonBefore={task_number} style={style} />
     </div>
 #
@@ -558,7 +558,7 @@ Task = React.createClass
 
   # Useful for debugging
   onClick: (e) ->
-    console.log(@state)
+    #console.log(@state)
 
   # How to draw a Question (single) task
   renderSingle: ->
@@ -583,7 +583,7 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
+    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
       <div className='drag-handel'>
         <span className='box-head'>
           Single
@@ -591,7 +591,7 @@ Task = React.createClass
         <a className='close close-box'>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} />
+      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
       <AnswerList inputs={inputs} />
@@ -616,7 +616,7 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
+    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
       <div className='drag-handel'>
         <span className='box-head'>
           Multiple
@@ -624,7 +624,7 @@ Task = React.createClass
         <a className='close close-box'>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} />
+      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
       <AnswerList  inputs={inputs} />
@@ -653,7 +653,7 @@ Task = React.createClass
       editDrawType: @onEditDrawType
       editDrawColor: @onEditDrawColor
 
-    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-idx={@state.idx} >
+    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
       <div className='drag-handel'>
         <span className='box-head'>
           Drawing
@@ -661,7 +661,7 @@ Task = React.createClass
         <a className='close close-box'>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} />
+      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <AnswerList inputs={inputs} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
@@ -676,29 +676,111 @@ Task = React.createClass
       when 'drawing' then return @renderDraw()
 #
 
+AddTaskButtons = React.createClass
+  displayName: 'AddTaskButtons'
+
+  render: ->
+    <ButtonGroup>
+      <Button onClick={@props.onSingle}>Question (single)</Button>
+      <Button onClick={@props.onMulti}>Question (multiple)</Button>
+      <Button onClick={@props.onDraw}>Drawing</Button>
+    </ButtonGroup>
+
 # Handel the full workflow
 Workflow = React.createClass
   displayName: 'Workflow'
 
+  # parse the input workflow json
   getInitialState: ->
     wf = @props.wf ? {}
     pos = @props.pos ? {}
+    keys = Object.keys(wf)
+    key_nums = (k[1...] for k in keys)
+    if key_nums.length > 0
+      uuid = Math.max(key_nums...) + 1
+    else
+      uuid = 0
+    uuids = ('task_' + k for k in key_nums)
     {
       wf: wf
       pos: pos
+      keys: keys
+      uuid: uuid
+      uuids: uuids
     }
 
-  createTask: (idx, task) ->
-    idx_num = @counter
-    @counter += 1
-    id = 'task_' + idx_num
-    <Task task={task} type={task.type} taskNumber={idx_num} pos={@state.pos[idx]} plumbId={id} key={id} idx={idx} />
+  # Get a existing/new unique uuid to use for the task node (needed for jsPlumb)
+  getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
+    if uuids[idx]?
+      return uuids[idx]
+    else
+      return 'task_' + uuid
+
+  # Set a new uuid to state
+  setUuid: (id) ->
+    current_uuids = @state.uuids.concat([id])
+    current_uuid = @state.uuid + 1
+    @setState({uuids: current_uuids, uuid: current_uuid})
+
+  # Make empty json for a task
+  makeNewTask: (type) ->
+    idx = @state.keys.length
+    new_key = 'T'+@state.uuid
+    uuid = @getUuid(idx)
+    switch type
+      when 'single'
+        new_wf =
+          question: ''
+          help: ''
+          required: false
+          type: 'single'
+          answers: []
+      when 'multiple'
+        new_wf =
+          question: ''
+          help: ''
+          required: false
+          type: 'multiple'
+          next: undefined
+          answers: []
+      when 'drawing'
+        new_wf =
+          question: ''
+          help: ''
+          required: false
+          type: 'drawing'
+          next: undefined
+          tools: []
+    @setUuid(uuid)
+    current_wf = @state.wf
+    current_wf[new_key] = new_wf
+    current_pos = @state.pos
+    current_pos[new_key] = {}
+    current_keys = @state.keys.concat([new_key])
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys})
+
+  onNewSingle: (e) ->
+    @makeNewTask('single')
+
+  onNewMulti: (e) ->
+    @makeNewTask('multiple')
+
+  onNewDraw: (e) ->
+    @makeNewTask('drawing')
+
+  createTask: (idx, name) ->
+    id = @getUuid(idx)
+    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} />
 
   render: ->
-    @counter = 0
-    <div>
-      {@createTask(idx, task) for idx, task of @state.wf}
-    </div>
+    <Row>
+      <Col xs={6} style={{marginTop: 15}}>
+        <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
+      </Col>
+      <Col xs={12} className='editor'>
+        {@createTask(idx, name) for name, idx in @state.keys}
+      </Col>
+    </Row>
 
 # Some example input for testing
 wf = {
@@ -764,4 +846,4 @@ pos = {
   }
 }
 
-React.render(<Workflow wf={wf} pos={pos} />, document.getElementById('editor'))
+React.render(<Workflow wf={wf} pos={pos} />, document.getElementById('insert'))
