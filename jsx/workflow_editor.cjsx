@@ -685,6 +685,20 @@ Workflow = React.createClass
     wf = @props.wf ? {}
     pos = @props.pos ? {}
     keys = Object.keys(wf)
+    if 'init' in keys
+      idx = keys.indexOf('init')
+      for i in [0..keys.length]
+        tmp = 'T'+i
+        if tmp not in keys
+          init = tmp
+          keys[idx] = tmp
+          wf[tmp] = wf['init']
+          pos[tmp] = pos['init']
+          delete wf['init']
+          delete pos['init']
+          break
+    else
+      init = null
     key_nums = (k[1...] for k in keys)
     if key_nums.length > 0
       uuid = Math.max(key_nums...) + 1
@@ -697,6 +711,7 @@ Workflow = React.createClass
       keys: keys
       uuid: uuid
       uuids: uuids
+      init: init
     }
 
   # Draw any existing connectors
@@ -810,7 +825,7 @@ Workflow = React.createClass
 
 # Some example input for testing
 wf = {
-  "T0": {
+  "init": {
     "question": "Is it a cat or bacon?",
     "help": "Some example help text!",
     "required": true,
@@ -855,7 +870,7 @@ wf = {
 }
 
 pos = {
-  "T0": {
+  "init": {
     "top": 221,
     "left": 275,
     "width": 200
