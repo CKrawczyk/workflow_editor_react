@@ -136,7 +136,7 @@ AnswerItem = React.createClass
       ep.canvas.style['z-index'] = @props.eps.zIndex
       @props.eps.add(ep)
       jp.revalidate(ep.elementId, null, true)
-      jp.dragManager.updateOffsets('task_' + @props.number)
+      jp.dragManager.updateOffsets(@props.inputs.plumbId)
     return
 
   componentWillUnmount: ->
@@ -217,7 +217,7 @@ AnswerList = React.createClass
         # recaculate the node position based on the DOM element
         jp.revalidate(ep.elementId, null, true)
       # tell jsPlumb's dragManager to update the offsets
-      jp.dragManager.updateOffsets('task_' + @props.inputs.number)
+      jp.dragManager.updateOffsets(@props.plumbId)
       @setState({removing: false})
 
   createAnswer: (idx, text, N, getUuid) ->
@@ -225,7 +225,6 @@ AnswerList = React.createClass
       N: N
       idx: idx
       listId: getUuid(idx)
-      ul_id: 'task_' + @props.inputs.number + '_answers'
       remove: @remove
       refMe: 'edit_answer_'+idx
       text: text
@@ -234,17 +233,18 @@ AnswerList = React.createClass
       task_init: @props.inputs.taskInit
       setUuid: @props.inputs.uuid.set
       type: @props.inputs.type
+      plumbId: @props.plumbId
     if @props.inputs.type == 'drawing'
       inputs.tool = @props.inputs.tools[idx]
       inputs.color = @props.inputs.colors[idx]
       inputs.editDrawType = @props.inputs.editDrawType
       inputs.editDrawColor = @props.inputs.editDrawColor
 
-    <AnswerItem key={'AI_' + idx} inputs={inputs} number={@props.inputs.number} eps={@props.inputs.eps} />
+    <AnswerItem key={'AI_' + idx} inputs={inputs} eps={@props.inputs.eps} />
 
   render: ->
     N = @props.inputs.answers.length
-    ul_id = 'task_' + @props.inputs.number + '_answers'
+    ul_id = @props.plumbId + '_answers'
     <ul className='list-unstyled' id={ul_id}>
       {@createAnswer(idx, text, N, @props.inputs.uuid.get) for text, idx in @props.inputs.answers}
     </ul>
@@ -415,13 +415,13 @@ Task = React.createClass
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
     # When loading with answsers make sure to use idx since setState is not called until after the loop
     if @state.task_init
-      return 'task_' + @state.task_number + '_answer_' + idx
+      return @props.plumbId + '_answer_' + idx
     # if it is already in the list, use existing value
     if uuids[idx]?
       return @state.uuids[idx]
     # if not make a new unique one
     else
-      return 'task_' + @state.task_number + '_answer_' + uuid
+      return @props.plumbId + '_answer_' + uuid
 
   # add an endpoint to the list of endpoints
   pushEps: (ep) ->
@@ -436,9 +436,9 @@ Task = React.createClass
     @setState({uuids: current_uuids})
 
   # when the node is removed clean up all endpoints
-  # this may need more later on when I test it
   componentWillUnmount: ->
-    jp.removeAllEndpoints(@props.plumbId)
+    for ep in @state.endpoints
+      jp.deleteEndpoint(ep)
     return
 
   # Callback for name change
@@ -583,18 +583,18 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
+    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
         <span className='box-head'>
           Single
         </span>
-        <a className='close close-box'>&times;</a>
+        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
+      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList inputs={inputs} />
+      <AnswerList inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
     </div>
 
@@ -616,18 +616,18 @@ Task = React.createClass
       edit: @onEdit
       number: @state.task_number
 
-    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
+    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
         <span className='box-head'>
           Multiple
         </span>
-        <a className='close close-box'>&times;</a>
+        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
+      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList  inputs={inputs} />
+      <AnswerList  inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
     </div>
 
@@ -653,17 +653,17 @@ Task = React.createClass
       editDrawType: @onEditDrawType
       editDrawColor: @onEditDrawColor
 
-    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} data-key={@state.wfKey} >
+    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
       <div className='drag-handel'>
         <span className='box-head'>
           Drawing
         </span>
-        <a className='close close-box'>&times;</a>
+        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@state.task_number} plumbId={@props.plumbId} />
+      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
-      <AnswerList inputs={inputs} />
+      <AnswerList inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
       <TypeColorSelect  onDrawType={@onDrawType} onDrawColor={@onDrawColor} drawType={@state.draw_type} drawColor={@state.draw_color} />
     </div>
@@ -759,22 +759,41 @@ Workflow = React.createClass
     current_keys = @state.keys.concat([new_key])
     @setState({wf: current_wf, pos: current_pos, keys: current_keys})
 
+  # Remove a task
+  removeTask: (e) ->
+    wfKey = e.target.getAttribute('data-wfkey')
+    idx = @state.keys.indexOf(wfKey)
+    current_wf = @state.wf
+    delete current_wf[wfKey]
+    current_pos = @state.pos
+    delete current_pos[wfKey]
+    current_keys = @state.keys
+    current_keys.splice(idx, 1)
+    current_uuids = @state.uuids
+    current_uuids.splice(idx, 1)
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids})
+
+  # New task callback
   onNewSingle: (e) ->
     @makeNewTask('single')
 
+  # New task callback
   onNewMulti: (e) ->
     @makeNewTask('multiple')
 
+  # New task callback
   onNewDraw: (e) ->
     @makeNewTask('drawing')
 
+  # Callback to make one task
   createTask: (idx, name) ->
     id = @getUuid(idx)
-    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} />
+    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} remove={@removeTask} />
 
   render: ->
     <Row>
-      <Col xs={6} style={{marginTop: 15}}>
+      <Col xs={12} style={{marginTop: 15}}>
+        <div style={{fontSize: 26}}> Add Task:</div>
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} className='editor'>
