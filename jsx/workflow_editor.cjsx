@@ -754,7 +754,6 @@ Workflow = React.createClass
       uuid: uuid
       uuids: uuids
       init: init
-
     }
 
   # Draw any existing connectors
@@ -936,7 +935,7 @@ Workflow = React.createClass
     editor = document.getElementById('editor')
     scrollLeft = editor.scrollLeft
     scrollTop = editor.scrollTop
-    wf = @state.wf
+    wf = JSON.parse(JSON.stringify(@state.wf))
     wf['init'] = wf[@state.init]
     delete wf[@state.init]
     # I have no idea how a drawing task gets 'answers' placed in it...
