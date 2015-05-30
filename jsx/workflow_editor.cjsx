@@ -877,7 +877,11 @@ Workflow = React.createClass
     current_keys.splice(idx, 1)
     current_uuids = @state.uuids
     current_uuids.splice(idx, 1)
-    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids})
+    if wfKey == @state.init
+      init = undefined
+    else
+      init = @state.init
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init})
 
   # New task callback
   onNewSingle: (e) ->
@@ -923,10 +927,13 @@ Workflow = React.createClass
       @setState({init: undefined})
       return
     if sourceId.length == 4
-      adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
-      delete current_wf[source_key].answers[adx]['next']
+      # if task removed via 'x' the detach events still fire so check for existance
+      if @refs[source_key]?
+        adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+        delete current_wf[source_key].answers[adx]['next']
     else
-      delete current_wf[source_key]['next']
+      if @refs[source_key]?
+        delete current_wf[source_key]['next']
     @setState({wf: current_wf})
     return
 
@@ -935,9 +942,12 @@ Workflow = React.createClass
     editor = document.getElementById('editor')
     scrollLeft = editor.scrollLeft
     scrollTop = editor.scrollTop
-    wf = JSON.parse(JSON.stringify(@state.wf))
-    wf['init'] = wf[@state.init]
-    delete wf[@state.init]
+    wf = {}
+    for k, idx in @state.keys
+      if k == @state.init
+        wf['init'] = @state.wf[k]
+      else
+        wf['T' + idx] = @state.wf[k]
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
     for tdx,t of wf
