@@ -325,6 +325,8 @@ Task = React.createClass
         uuids: []
         type: @props.type
         idx: @props.idx
+        plumbId: @props.plumbId
+        push_update: false
       }
     else
       {
@@ -346,6 +348,8 @@ Task = React.createClass
         uuids: []
         type: @props.type
         idx: @props.idx
+        plumbId: @props.plumbId
+        push_update: false
       }
 
   componentDidMount: ->
@@ -392,6 +396,11 @@ Task = React.createClass
     @setState({endpoints: eps})
     return
 
+  # Make sure workflow knows about updates
+  workflowUpdate: ->
+    if not @state.task_init
+      @props.onUpdate(@state)
+
   # Keep track of unique uuids to use for each answer DOM element
   # These can't be re-used after removal, otherwise the endpoint will not draw in the right spot
   # This is a limitation of jsPlumb
@@ -433,7 +442,7 @@ Task = React.createClass
 
   # Callback for name change
   onName: (e) ->
-    @setState({question: e.target.value})
+    @setState({question: e.target.value}, @workflowUpdate)
 
   # Callback for new answer change
   onChange: (e) ->
@@ -455,14 +464,12 @@ Task = React.createClass
   handelAdd: (e) ->
     if not @isEmptyStr(@state.answer_text)
       current_answers = @state.answers.concat([@state.answer_text])
-      @setState({answers: current_answers})
-      @setState({number: current_answers.length})
-      @setState({answer_text: ''})
       if @state.type == 'drawing'
         current_draw_types = @state.draw_types.concat([@state.draw_type])
         current_draw_colors = @state.draw_colors.concat([@state.draw_color])
-        @setState({draw_types: current_draw_types})
-        @setState({draw_colors: current_draw_colors})
+        @setState({answers: current_answers, number: current_answers.length, draw_types: current_draw_types, draw_colors: current_draw_colors}, @workflowUpdate)
+      else
+        @setState({answers: current_answers, number: current_answers.length, answer_text: ''}, @workflowUpdate)
 
   # Callback to remove an asnwer from the list
   handelRemove: (e) ->
@@ -474,39 +481,38 @@ Task = React.createClass
       current_draw_colors = @state.draw_colors
       current_draw_types.splice(idx, 1)
       current_draw_colors.splice(idx, 1)
-      @setState({draw_types: current_draw_types})
-      @setState({draw_colors: current_draw_colors})
-    @setState({answers: current_answers})
-    @setState({number: current_answers.length})
+      @setState({answers: current_answers, number: current_answers.length, draw_types: current_draw_types, draw_colors: current_draw_colors}, @workflowUpdate)
+    else
+      @setState({answers: current_answers, number: current_answers.length}, @workflowUpdate)
 
   # Callback when help text is changed
   onHelp: (e) ->
-    @setState({help_text: e.target.value})
+    @setState({help_text: e.target.value}, @workflowUpdate)
 
   # Callback when answer/tool text is edited
   onEdit: (e) ->
     current_answers = @state.answers
     idx = +e.target.getAttribute('data-idx')
     current_answers[idx] = e.target.value
-    @setState({answers: current_answers})
+    @setState({answers: current_answers}, @workflowUpdate)
 
   # Callback when drawing task type is edited
   onEditDrawType: (e) ->
     current_draw_types = @state.draw_types
     idx = +e.target.getAttribute('data-idx')
     current_draw_types[idx] = e.target.value
-    @setState({draw_types: current_draw_types})
+    @setState({draw_types: current_draw_types}, @workflowUpdate)
 
   # Callback when drawing task color is edited
   onEditDrawColor: (e) ->
     current_draw_colors = @state.draw_colors
     idx = +e.target.getAttribute('data-idx')
     current_draw_colors[idx] = e.target.value
-    @setState({draw_colors: current_draw_colors})
+    @setState({draw_colors: current_draw_colors}, @workflowUpdate)
 
   # Callback when "required" box is toggled
   onReq: (e) ->
-    @setState({required: e.target.checked})
+    @setState({required: e.target.checked}, @workflowUpdate)
 
   # Make sure element being dragged is on top layer
   onDrag: (e) ->
@@ -748,6 +754,7 @@ Workflow = React.createClass
       uuid: uuid
       uuids: uuids
       init: init
+
     }
 
   # Draw any existing connectors
@@ -774,6 +781,41 @@ Workflow = React.createClass
           else
             c = [@state.uuids[idx] + '_next', 'end']
           jp.connect({uuids: c})
+    jp.bind('connection', @onConnect)
+    jp.bind('connectionDetached', @onDetach)
+
+  taskUpdate: (taskState) ->
+    current_wf = @state.wf
+    task_key = 'T' + taskState.plumbId.split('_')[1]
+    current_wf[task_key].question = taskState.question
+    current_wf[task_key].help = taskState.help_text
+    if taskState.type != 'drawing'
+      current_wf[task_key].required = taskState.required
+    switch taskState.type
+      when 'single'
+        ans = []
+        for lab, idx in taskState.answers
+          a = {label: lab}
+          c = jp.getConnections({source: taskState.uuids[idx]})
+          if c.length > 0
+            a['next'] = 'T' + c[0].targetId.split('_')[1]
+          ans.push(a)
+        current_wf[task_key].answers = ans
+      when 'multiple'
+        ans = []
+        for lab in taskState.answers
+          ans.push({label: lab})
+        current_wf[task_key].answers = ans
+      when 'drawing'
+        tools = []
+        for lab, idx in taskState.answers
+          t =
+            label: lab
+            type: taskState.draw_types[idx]
+            color: taskState.draw_colors[idx]
+          tools.push(t)
+        current_wf[task_key].tools = tools
+    @setState({wf: current_wf})
 
   # Get a existing/new unique uuid to use for the task node (needed for jsPlumb)
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
@@ -813,7 +855,6 @@ Workflow = React.createClass
         new_wf =
           question: ''
           help: ''
-          required: false
           type: 'drawing'
           next: undefined
           tools: []
@@ -851,23 +892,64 @@ Workflow = React.createClass
   onNewDraw: (e) ->
     @makeNewTask('drawing')
 
+  onConnect: (e) ->
+    # make sure updates to tasks are updated in state.wf!!!
+    sourceId = e.sourceId.split('_')
+    targetId = e.targetId.split('_')
+    source_key = 'T' + sourceId[1]
+    target_key = 'T' + targetId[1]
+    current_wf = @state.wf
+    if e.sourceId == 'start'
+      @setState({init: target_key})
+      return
+    else if sourceId.length == 4
+      adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+      if e.targetId == 'end'
+        delete current_wf[source_key].answers[adx]['next']
+      else
+        current_wf[source_key].answers[adx]['next'] = target_key
+    else
+      if e.targetId == 'end'
+        delete current_wf[source_key]['next']
+      else
+        current_wf[source_key]['next'] = target_key
+    @setState({wf: current_wf})
+    return
+
+  onDetach: (e) ->
+    sourceId = e.sourceId.split('_')
+    source_key = 'T' + sourceId[1]
+    current_wf = @state.wf
+    if e.sourceId == 'start'
+      @setState({init: undefined})
+      return
+    if sourceId.length == 4
+      adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+      delete current_wf[source_key].answers[adx]['next']
+    else
+      delete current_wf[source_key]['next']
+    @setState({wf: current_wf})
+    return
+
   # Construct workflow json from nodes
   getWorkflow: ->
     editor = document.getElementById('editor')
     scrollLeft = editor.scrollLeft
     scrollTop = editor.scrollTop
-    for k, kdx in @state.keys
-      switch @state.wf[k].type
-        when 'single'
-          console.log('todo')
-        else
-          id = @state.uuids[kdx]+ '_next'
-          console.log(id, jp.getConnections({source: id}))
+    wf = @state.wf
+    wf['init'] = wf[@state.init]
+    delete wf[@state.init]
+    # I have no idea how a drawing task gets 'answers' placed in it...
+    # For now just remove it
+    for tdx,t of wf
+      if t.type == 'drawing'
+        delete t['answers']
+    console.log(wf)
 
   # Callback to make one task
   createTask: (idx, name) ->
     id = @getUuid(idx)
-    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} />
+    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} onUpdate={@taskUpdate} />
 
   render: ->
     <Row>
