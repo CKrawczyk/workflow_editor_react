@@ -692,6 +692,7 @@ StartEndNode = React.createClass
     }
 
   componentDidMount: ->
+    @me = React.findDOMNode(this)
     drag_options =
       start: @onDrag
     jp.draggable(@props.type, drag_options)
@@ -754,6 +755,8 @@ Workflow = React.createClass
       uuid: uuid
       uuids: uuids
       init: init
+      wf_out: ''
+      pos_out: ''
     }
 
   # Draw any existing connectors
@@ -943,17 +946,40 @@ Workflow = React.createClass
     scrollLeft = editor.scrollLeft
     scrollTop = editor.scrollTop
     wf = {}
+    pos = {}
     for k, idx in @state.keys
+      p =
+        top: parseFloat(@refs[k].me.style.top) + scrollTop + 'px'
+        left: parseFloat(@refs[k].me.style.left) + scrollLeft + 'px'
+        width: @refs[k].me.style.width
       if k == @state.init
         wf['init'] = @state.wf[k]
+        pos['init'] = p
       else
         wf['T' + idx] = @state.wf[k]
+        pos['T' + idx] = p
+    pos['start'] =
+      top: window.getComputedStyle(@refs['start'].me).top
+      left: window.getComputedStyle(@refs['start'].me).left
+    pos['end'] =
+      top: window.getComputedStyle(@refs['end'].me).top
+      left: window.getComputedStyle(@refs['end'].me).left
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
     for tdx,t of wf
       if t.type == 'drawing'
         delete t['answers']
-    console.log(wf)
+    @setState({wf_out: wf, pos_out: pos})
+    #console.log(wf, pos)
+
+  onClear: ->
+    console.log('TODO')
+
+  loadEx1: ->
+    console.log('TODO')
+
+  loadEx2: ->
+    console.log('TODO')
 
   # Callback to make one task
   createTask: (idx, name) ->
@@ -967,11 +993,44 @@ Workflow = React.createClass
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} id='editor'>
-        <StartEndNode type='start' />
-        <StartEndNode type='end' />
+        <StartEndNode type='start' ref='start' />
+        <StartEndNode type='end'  ref='end' />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
-      <Button onClick={@getWorkflow}> Get Workflow </Button>
+      <Col xs={12}>
+        <h3>How to use:</h3>
+        <ul>
+          <li>Add a new task by clicking one of the three buttons at the top of the page</li>
+          <li>Move the task node by clicking and dragging anywhere you want (page auto scrolls)</li>
+          <li>The width of the task nodes can be resized</li>
+          <li>Enter the task's question into the top text box of the task node (this is a multi-line textarea)</li>
+          <li>Enter the task's help text by clicking the "Help Text" button</li>
+          <li>Add answers/tools to the task by entering them into the bottom text box (this is a multi-line textarea) and clicking the "+"</li>
+          <li>Edit answers/tools by clicking the "pencil" icon</li>
+          <li>Connect the tasks/answers with the next task by clicking and dragging the black dot to the right of the task/answer to the black dot on the left of the next task</li>
+          <li>Remvoe tasks/answers/tools by clicking the "x"</li>
+          <li>Click "Show workflow" to show the Panoptes JSON for the workflow (The positions of each task node on the page are also shown)</li>
+          <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
+        </ul>
+      </Col>
+      <Col xs={2}>
+        <Button onClick={@getWorkflow}> Get Workflow </Button>
+      </Col>
+      <Col xs={2}>
+        <Button onClick={@loadEx1}> Load example 1 </Button>
+      </Col>
+      <Col xs={2}>
+        <Button onClick={@loadEx2}> Load example 2 </Button>
+      </Col>
+      <Col xs={2}>
+        <Button onClick={@onClear}> Clear </Button>
+      </Col>
+      <Col xs={6}>
+        <pre> {JSON.stringify(@state.wf_out, undefined, 2)} </pre>
+      </Col>
+      <Col xs={6}>
+        <pre> {JSON.stringify(@state.pos_out, undefined, 2)} </pre>
+      </Col>
     </Row>
 
 # Some example input for testing
