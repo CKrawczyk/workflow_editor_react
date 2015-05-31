@@ -8,6 +8,8 @@ Popover = require 'react-bootstrap/lib/Popover'
 Row = require 'react-bootstrap/lib/Row'
 Col = require 'react-bootstrap/lib/Col'
 MarkdownIt = require 'markdown-it'
+Ex1 = require './test_workflow_load.js'
+Ex2 = require './test_workflow_load_gz.js'
 $ = jQuery = require 'jquery'
 require 'jquery-ui/resizable'
 
@@ -369,6 +371,7 @@ Task = React.createClass
     drag_options =
       handle: '.drag-handel'
       start: @onDrag
+      stop: @props.onMove
     jp.draggable(@props.plumbId, drag_options)
     # add an "input" endpoint
     ep = jp.addEndpoint(@props.plumbId, commonT, {uuid: @props.plumbId})
@@ -693,8 +696,11 @@ StartEndNode = React.createClass
 
   componentDidMount: ->
     @me = React.findDOMNode(this)
+    @me.style.left = window.getComputedStyle(@me).left
+    @me.style.top = window.getComputedStyle(@me).top
     drag_options =
       start: @onDrag
+      stop: @props.onMove
     jp.draggable(@props.type, drag_options)
     switch @props.type
       when 'start' then ep = jp.addEndpoint(@props.type, commonA, {uuid: @props.type})
@@ -712,9 +718,13 @@ StartEndNode = React.createClass
     style =
       top: '50%'
       zIndex: @state.zIndex
-    switch @props.type
-      when 'start' then style['left'] = '0%'
-      when 'end' then style['right'] = '0%'
+    if @props.styleIn?
+      style['top'] = @props.styleIn.top
+      style['left'] = @props.styleIn.left
+    else
+      switch @props.type
+        when 'start' then style['left'] = '0%'
+        when 'end' then style['right'] = '0%'
     <div className='box-end' id={@props.type} style={style}>
       {@props.type.charAt(0).toUpperCase() + @props.type.slice(1)}
     </div>
@@ -755,8 +765,8 @@ Workflow = React.createClass
       uuid: uuid
       uuids: uuids
       init: init
-      wf_out: ''
-      pos_out: ''
+      wf_out: {}
+      pos_out: {}
     }
 
   # Draw any existing connectors
@@ -765,7 +775,7 @@ Workflow = React.createClass
       idx = @state.keys.indexOf(@state.init)
       c = ['start', @state.uuids[idx]]
       jp.connect({uuids: c})
-    for wfKey,w of wf
+    for wfKey,w of @state.wf
       idx = @state.keys.indexOf(wfKey)
       switch w.type
         when 'single'
@@ -785,6 +795,7 @@ Workflow = React.createClass
           jp.connect({uuids: c})
     jp.bind('connection', @onConnect)
     jp.bind('connectionDetached', @onDetach)
+    @getWorkflow()
 
   taskUpdate: (taskState) ->
     current_wf = @state.wf
@@ -817,7 +828,7 @@ Workflow = React.createClass
             color: taskState.draw_colors[idx]
           tools.push(t)
         current_wf[task_key].tools = tools
-    @setState({wf: current_wf})
+    @setState({wf: current_wf}, @getWorkflow)
 
   # Get a existing/new unique uuid to use for the task node (needed for jsPlumb)
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
@@ -833,40 +844,44 @@ Workflow = React.createClass
     @setState({uuids: current_uuids, uuid: current_uuid})
 
   # Make empty json for a task
-  makeNewTask: (type) ->
+  makeNewTask: (type, task, pos) ->
     idx = @state.keys.length
     new_key = 'T'+@state.uuid
     uuid = @getUuid(idx)
-    switch type
-      when 'single'
-        new_wf =
-          question: ''
-          help: ''
-          required: false
-          type: 'single'
-          answers: []
-      when 'multiple'
-        new_wf =
-          question: ''
-          help: ''
-          required: false
-          type: 'multiple'
-          next: undefined
-          answers: []
-      when 'drawing'
-        new_wf =
-          question: ''
-          help: ''
-          type: 'drawing'
-          next: undefined
-          tools: []
-    @setUuid(uuid)
     current_wf = @state.wf
-    current_wf[new_key] = new_wf
     current_pos = @state.pos
-    current_pos[new_key] = {}
+    if task?
+      current_wf[new_key] = task
+      current_pos[new_key] = pos
+    else
+      switch type
+        when 'single'
+          new_wf =
+            question: ''
+            help: ''
+            required: false
+            type: 'single'
+            answers: []
+        when 'multiple'
+          new_wf =
+            question: ''
+            help: ''
+            required: false
+            type: 'multiple'
+            next: undefined
+            answers: []
+        when 'drawing'
+          new_wf =
+            question: ''
+            help: ''
+            type: 'drawing'
+            next: undefined
+            tools: []
+      current_wf[new_key] = new_wf
+      current_pos[new_key] = {}
+    @setUuid(uuid)
     current_keys = @state.keys.concat([new_key])
-    @setState({wf: current_wf, pos: current_pos, keys: current_keys})
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys}, @getWorkflow)
 
   # Remove a task
   removeTask: (e) ->
@@ -884,7 +899,7 @@ Workflow = React.createClass
       init = undefined
     else
       init = @state.init
-    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init})
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
 
   # New task callback
   onNewSingle: (e) ->
@@ -906,7 +921,7 @@ Workflow = React.createClass
     target_key = 'T' + targetId[1]
     current_wf = @state.wf
     if e.sourceId == 'start'
-      @setState({init: target_key})
+      @setState({init: target_key}, @getWorkflow)
       return
     else if sourceId.length == 4
       adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
@@ -919,7 +934,7 @@ Workflow = React.createClass
         delete current_wf[source_key]['next']
       else
         current_wf[source_key]['next'] = target_key
-    @setState({wf: current_wf})
+    @setState({wf: current_wf}, @getWorkflow)
     return
 
   onDetach: (e) ->
@@ -927,7 +942,7 @@ Workflow = React.createClass
     source_key = 'T' + sourceId[1]
     current_wf = @state.wf
     if e.sourceId == 'start'
-      @setState({init: undefined})
+      @setState({init: undefined}, @getWorkflow)
       return
     if sourceId.length == 4
       # if task removed via 'x' the detach events still fire so check for existance
@@ -937,7 +952,7 @@ Workflow = React.createClass
     else
       if @refs[source_key]?
         delete current_wf[source_key]['next']
-    @setState({wf: current_wf})
+    @setState({wf: current_wf}, @getWorkflow)
     return
 
   # Construct workflow json from nodes
@@ -959,32 +974,36 @@ Workflow = React.createClass
         wf['T' + idx] = @state.wf[k]
         pos['T' + idx] = p
     pos['start'] =
-      top: window.getComputedStyle(@refs['start'].me).top
-      left: window.getComputedStyle(@refs['start'].me).left
+      top: parseFloat(@refs['start'].me.style.top) + scrollTop + 'px'
+      left: parseFloat(@refs['start'].me.style.left) + scrollLeft + 'px'
     pos['end'] =
-      top: window.getComputedStyle(@refs['end'].me).top
-      left: window.getComputedStyle(@refs['end'].me).left
+      top: parseFloat(@refs['end'].me.style.top) + scrollTop + 'px'
+      left: parseFloat(@refs['end'].me.style.left) + scrollLeft + 'px'
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
     for tdx,t of wf
       if t.type == 'drawing'
         delete t['answers']
     @setState({wf_out: wf, pos_out: pos})
-    #console.log(wf, pos)
 
-  onClear: ->
-    console.log('TODO')
+  onClear: (callback = @getWorkflow) ->
+    current_wf = {}
+    current_pos = {}
+    current_keys = []
+    current_uuids = []
+    init = undefined
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, callback)
 
   loadEx1: ->
-    console.log('TODO')
+    console.log(Ex1)
 
   loadEx2: ->
-    console.log('TODO')
+    console.log(Ex2)
 
   # Callback to make one task
   createTask: (idx, name) ->
     id = @getUuid(idx)
-    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} onUpdate={@taskUpdate} />
+    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} onUpdate={@taskUpdate} onMove={@getWorkflow} />
 
   render: ->
     <Row>
@@ -993,8 +1012,8 @@ Workflow = React.createClass
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} id='editor'>
-        <StartEndNode type='start' ref='start' />
-        <StartEndNode type='end'  ref='end' />
+        <StartEndNode type='start' ref='start' styleIn={@props.pos['start']} onMove={@getWorkflow} />
+        <StartEndNode type='end'  ref='end' styleIn={@props.pos['end']} onMove={@getWorkflow} />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
       <Col xs={12}>
@@ -1013,16 +1032,13 @@ Workflow = React.createClass
           <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
         </ul>
       </Col>
-      <Col xs={2}>
-        <Button onClick={@getWorkflow}> Get Workflow </Button>
-      </Col>
-      <Col xs={2}>
+      <Col xs={3}>
         <Button onClick={@loadEx1}> Load example 1 </Button>
       </Col>
-      <Col xs={2}>
+      <Col xs={3}>
         <Button onClick={@loadEx2}> Load example 2 </Button>
       </Col>
-      <Col xs={2}>
+      <Col xs={3}>
         <Button onClick={@onClear}> Clear </Button>
       </Col>
       <Col xs={6}>
@@ -1034,68 +1050,6 @@ Workflow = React.createClass
     </Row>
 
 # Some example input for testing
-wf = {
-  "init": {
-    "question": "Is it a cat or bacon?",
-    "help": "Some example help text!",
-    "required": true,
-    "type": "single",
-    "answers": [
-      {
-        "label": "cat",
-        "next": "T1"
-      },
-      {
-        "label": "bacon",
-        "next": "T2"
-      }
-    ]
-  },
-  "T1": {
-    "question": "Is it cute?",
-    "help": "",
-    "type": "multiple",
-    "next": "T2"
-    "answers": [
-      {
-        "label": "yes",
-      },
-      {
-        "label": "no",
-      }
-    ]
-  },
-  "T2": {
-    "question": "Click the cat",
-    "help": "",
-    "type": "drawing",
-    "tools": [
-      {
-        "label": "CAT!",
-        "type": "point",
-        "color": "red"
-      }
-    ]
-  }
-}
 
-pos = {
-  "init": {
-    "top": 221,
-    "left": 275,
-    "width": 200
-  },
-  "T1": {
-    "top": 86,
-    "left": 669.65,
-    "width": 200
-  },
-  "T2": {
-    "top": 265,
-    "left": 987,
-    "width": 246
-  }
-}
-
-React.render(<Workflow wf={wf} pos={pos} />, document.getElementById('insert'))
+React.render(<Workflow wf={Ex1.wf} pos={Ex1.pos} />, document.getElementById('insert'))
 #React.render(<Workflow />, document.getElementById('insert'))
