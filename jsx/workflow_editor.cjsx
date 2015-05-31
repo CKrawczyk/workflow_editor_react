@@ -552,7 +552,7 @@ Task = React.createClass
     @bounding_rect = @me.getBoundingClientRect()
     for ep in @state.endpoints[1...]
       jp.revalidate(ep.elementId, null, true)
-    #jp.dragManager.updateOffsets(@props.plumbId)
+    @props.onMove()
     return
 
   # Useful for debugging
