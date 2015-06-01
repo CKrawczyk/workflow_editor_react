@@ -79,13 +79,8 @@
   padding: 10px;
 }
 
-.add-answer,
-.add-tool {
+.add-answer {
   height: 46px;
-}
-
-.tool-add {
-  padding: 10px;
 }
 
 .answer-item {

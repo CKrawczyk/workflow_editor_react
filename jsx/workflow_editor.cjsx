@@ -470,7 +470,7 @@ Task = React.createClass
       if @state.type == 'drawing'
         current_draw_types = @state.draw_types.concat([@state.draw_type])
         current_draw_colors = @state.draw_colors.concat([@state.draw_color])
-        @setState({answers: current_answers, number: current_answers.length, draw_types: current_draw_types, draw_colors: current_draw_colors}, @workflowUpdate)
+        @setState({answers: current_answers, number: current_answers.length, answer_text: '', draw_types: current_draw_types, draw_colors: current_draw_colors}, @workflowUpdate)
       else
         @setState({answers: current_answers, number: current_answers.length, answer_text: ''}, @workflowUpdate)
 
