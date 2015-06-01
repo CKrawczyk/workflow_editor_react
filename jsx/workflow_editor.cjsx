@@ -1071,15 +1071,16 @@ Workflow = React.createClass
         <h3>How to use:</h3>
         <ul>
           <li>Add a new task by clicking one of the three buttons at the top of the page</li>
-          <li>Move the task node by clicking and dragging anywhere you want (page auto scrolls)</li>
-          <li>The width of the task nodes can be resized</li>
+          <li>Move the task node by clicking and dragging the top of the task anywhere you want (page auto scrolls)</li>
+          <li>The width of the task nodes can be resized by dragging the right side</li>
           <li>Enter the task's question into the top text box of the task node (this is a multi-line textarea)</li>
           <li>Enter the task's help text by clicking the "Help Text" button</li>
           <li>Add answers/tools to the task by entering them into the bottom text box (this is a multi-line textarea) and clicking the "+"</li>
+          <li>Markdown preview for answer/tool is shown in the node</li>
           <li>Edit answers/tools by clicking the "pencil" icon</li>
           <li>Connect the tasks/answers with the next task by clicking and dragging the black dot to the right of the task/answer to the black dot on the left of the next task</li>
           <li>Remvoe tasks/answers/tools by clicking the "x"</li>
-          <li>Click "Show workflow" to show the Panoptes JSON for the workflow (The positions of each task node on the page are also shown)</li>
+          <li>The Panoptes JSON for the workflow is automatically updated below (The positions of each task node on the page are also shown)</li>
           <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
         </ul>
       </Col>
