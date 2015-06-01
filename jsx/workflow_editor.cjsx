@@ -691,13 +691,12 @@ StartEndNode = React.createClass
   getInitialState: ->
     {
       zIndex: 1
-      ep: undefined
     }
 
   componentDidMount: ->
     @me = React.findDOMNode(this)
-    @me.style.left = window.getComputedStyle(@me).left
-    @me.style.top = window.getComputedStyle(@me).top
+    @left = @me.style.left = window.getComputedStyle(@me).left
+    @top = @me.style.top = window.getComputedStyle(@me).top
     drag_options =
       start: @onDrag
       stop: @props.onMove
@@ -706,25 +705,34 @@ StartEndNode = React.createClass
       when 'start' then ep = jp.addEndpoint(@props.type, commonA, {uuid: @props.type})
       when 'end' then ep = jp.addEndpoint(@props.type, commonT, {uuid: @props.type})
     ep.canvas.style['z-index'] = @state.zIndex
-    @setState({ep: ep})
+    @ep = ep
+
+  moveMe: (pos, reset = false) ->
+    if reset
+      pos =
+        left: @left
+        top: @top
+    else
+      pos =
+        left: pos.left + ''
+        top: pos.top + ''
+    @me.style.left = if pos.left[-2..] == 'px' then pos.left else pos.left + 'px'
+    @me.style.top = if pos.top[-2..] == 'px' then pos.top else pos.top + 'px'
+    jp.revalidate(@ep.elementId, null, true)
 
   onDrag: ->
     if @state.zIndex < max_z
       max_z += 1
-      @state.ep.canvas.style['z-index'] = max_z
+      @ep.canvas.style['z-index'] = max_z
       @setState({zIndex: max_z})
 
   render: ->
     style =
       top: '50%'
       zIndex: @state.zIndex
-    if @props.styleIn?
-      style['top'] = @props.styleIn.top
-      style['left'] = @props.styleIn.left
-    else
-      switch @props.type
-        when 'start' then style['left'] = '0%'
-        when 'end' then style['right'] = '0%'
+    switch @props.type
+      when 'start' then style['left'] = '0%'
+      when 'end' then style['right'] = '0%'
     <div className='box-end' id={@props.type} style={style}>
       {@props.type.charAt(0).toUpperCase() + @props.type.slice(1)}
     </div>
@@ -771,6 +779,10 @@ Workflow = React.createClass
 
   # Draw any existing connectors
   componentDidMount: ->
+    if @state.pos['start']?
+      @refs['start'].moveMe(@state.pos['start'])
+    if @state.pos['end']?
+      @refs['end'].moveMe(@state.pos['end'])
     if @state.init?
       idx = @state.keys.indexOf(@state.init)
       c = ['start', @state.uuids[idx]]
@@ -946,11 +958,11 @@ Workflow = React.createClass
       return
     if sourceId.length == 4
       # if task removed via 'x' the detach events still fire so check for existance
-      if @refs[source_key]?
+      if (@refs[source_key]?) and (current_wf[source_key]?)
         adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
         delete current_wf[source_key].answers[adx]['next']
     else
-      if @refs[source_key]?
+      if (@refs[source_key]?) and (current_wf[source_key]?)
         delete current_wf[source_key]['next']
     @setState({wf: current_wf}, @getWorkflow)
     return
@@ -986,19 +998,58 @@ Workflow = React.createClass
         delete t['answers']
     @setState({wf_out: wf, pos_out: pos})
 
-  onClear: (callback = @getWorkflow) ->
+  onClear: ->
     current_wf = {}
     current_pos = {}
     current_keys = []
     current_uuids = []
     init = undefined
-    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, callback)
+    @refs['start'].moveMe(null, true)
+    @refs['end'].moveMe(null, true)
+    @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
+
+  loadWf: (wf_in, pos_in) ->
+    tdx = @state.uuid
+    current_wf = {}
+    current_pos = {}
+    current_uuids = []
+    current_keys = []
+    key_dict = {}
+    init = undefined
+    for k,v of wf_in
+      new_key = 'T' + tdx
+      key_dict[k] = new_key
+      current_keys.push(new_key)
+      current_wf[new_key] = v
+      current_pos[new_key] = pos_in[k]
+      current_uuids.push('task_' + tdx)
+      if k == 'init'
+        init = new_key
+      tdx += 1
+    for k,v of current_wf
+      if v.type == 'single'
+        for a in v.answers
+          if a.next?
+            a.next = key_dict[a.next]
+      else
+        if v.next?
+          v.next = key_dict[v.next]
+    current_pos['start'] = pos_in['start']
+    current_pos['end'] = pos_in['end']
+    new_state =
+      wf: current_wf
+      pos: current_pos
+      keys: current_keys
+      uuids: current_uuids
+      uuid: tdx
+      init: init
+    @setState(new_state, @componentDidMount)
 
   loadEx1: ->
-    console.log(Ex1)
+    @loadWf(clone(Ex1.wf), clone(Ex1.pos))
 
   loadEx2: ->
-    console.log(Ex2)
+    @loadWf(clone(Ex2.wf), clone(Ex2.pos))
 
   # Callback to make one task
   createTask: (idx, name) ->
@@ -1012,8 +1063,8 @@ Workflow = React.createClass
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} id='editor'>
-        <StartEndNode type='start' ref='start' styleIn={@props.pos['start']} onMove={@getWorkflow} />
-        <StartEndNode type='end'  ref='end' styleIn={@props.pos['end']} onMove={@getWorkflow} />
+        <StartEndNode type='start' ref='start' onMove={@getWorkflow} />
+        <StartEndNode type='end'  ref='end' onMove={@getWorkflow} />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
       <Col xs={12}>
@@ -1048,8 +1099,12 @@ Workflow = React.createClass
         <pre> {JSON.stringify(@state.pos_out, undefined, 2)} </pre>
       </Col>
     </Row>
+#
 
-# Some example input for testing
+# A function to clone JSON object
+clone = (obj) ->
+  return JSON.parse(JSON.stringify(obj))
+#
 
-React.render(<Workflow wf={Ex1.wf} pos={Ex1.pos} />, document.getElementById('insert'))
-#React.render(<Workflow />, document.getElementById('insert'))
+#React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
+React.render(<Workflow />, document.getElementById('insert'))
