@@ -695,8 +695,11 @@ StartEndNode = React.createClass
 
   componentDidMount: ->
     @me = React.findDOMNode(this)
-    @left = @me.style.left = window.getComputedStyle(@me).left
-    @top = @me.style.top = window.getComputedStyle(@me).top
+    @empty_style =
+      left: @me.offsetLeft + 'px'
+      top: @me.offsetTop + 'px'
+    @me.style.left = @empty_style.left
+    @me.style.top = @empty_style.top
     drag_options =
       start: @onDrag
       stop: @props.onMove
@@ -709,9 +712,7 @@ StartEndNode = React.createClass
 
   moveMe: (pos, reset = false) ->
     if reset
-      pos =
-        left: @left
-        top: @top
+      pos = @empty_style
     else
       pos =
         left: pos.left + ''
@@ -969,15 +970,10 @@ Workflow = React.createClass
 
   # Construct workflow json from nodes
   getWorkflow: ->
-    editor = document.getElementById('editor')
-    scrollLeft = editor.scrollLeft
-    scrollTop = editor.scrollTop
     wf = {}
     pos = {}
     for k, idx in @state.keys
       p =
-        #top: parseFloat(@refs[k].me.style.top) + scrollTop + 'px'
-        #left: parseFloat(@refs[k].me.style.left) + scrollLeft + 'px'
         top: @refs[k].me.style.top
         left: @refs[k].me.style.left
         width: @refs[k].me.style.width
@@ -988,13 +984,9 @@ Workflow = React.createClass
         wf['T' + idx] = @state.wf[k]
         pos['T' + idx] = p
     pos['start'] =
-      #top: parseFloat(@refs['start'].me.style.top) + scrollTop + 'px'
-      #left: parseFloat(@refs['start'].me.style.left) + scrollLeft + 'px'
       top: @refs['start'].me.style.top
       left: @refs['start'].me.style.left
     pos['end'] =
-      #top: parseFloat(@refs['end'].me.style.top) + scrollTop + 'px'
-      #left: parseFloat(@refs['end'].me.style.left) + scrollLeft + 'px'
       top: @refs['end'].me.style.top
       left: @refs['end'].me.style.left
     # I have no idea how a drawing task gets 'answers' placed in it...
