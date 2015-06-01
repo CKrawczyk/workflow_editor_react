@@ -102,7 +102,7 @@ exports.pos = {
     "left": "11px"
   },
   "end": {
-    "top": "288px",
-    "left": "1295px"
+    "top": "301px",
+    "left": "1294px"
   }
-}
+} 

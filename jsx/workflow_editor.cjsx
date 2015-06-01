@@ -976,8 +976,10 @@ Workflow = React.createClass
     pos = {}
     for k, idx in @state.keys
       p =
-        top: parseFloat(@refs[k].me.style.top) + scrollTop + 'px'
-        left: parseFloat(@refs[k].me.style.left) + scrollLeft + 'px'
+        #top: parseFloat(@refs[k].me.style.top) + scrollTop + 'px'
+        #left: parseFloat(@refs[k].me.style.left) + scrollLeft + 'px'
+        top: @refs[k].me.style.top
+        left: @refs[k].me.style.left
         width: @refs[k].me.style.width
       if k == @state.init
         wf['init'] = @state.wf[k]
@@ -986,11 +988,15 @@ Workflow = React.createClass
         wf['T' + idx] = @state.wf[k]
         pos['T' + idx] = p
     pos['start'] =
-      top: parseFloat(@refs['start'].me.style.top) + scrollTop + 'px'
-      left: parseFloat(@refs['start'].me.style.left) + scrollLeft + 'px'
+      #top: parseFloat(@refs['start'].me.style.top) + scrollTop + 'px'
+      #left: parseFloat(@refs['start'].me.style.left) + scrollLeft + 'px'
+      top: @refs['start'].me.style.top
+      left: @refs['start'].me.style.left
     pos['end'] =
-      top: parseFloat(@refs['end'].me.style.top) + scrollTop + 'px'
-      left: parseFloat(@refs['end'].me.style.left) + scrollLeft + 'px'
+      #top: parseFloat(@refs['end'].me.style.top) + scrollTop + 'px'
+      #left: parseFloat(@refs['end'].me.style.left) + scrollLeft + 'px'
+      top: @refs['end'].me.style.top
+      left: @refs['end'].me.style.left
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
     for tdx,t of wf
