@@ -974,9 +974,9 @@ Workflow = React.createClass
     pos = {}
     for k, idx in @state.keys
       p =
-        top: @refs[k].me.style.top
-        left: @refs[k].me.style.left
-        width: @refs[k].me.style.width
+        top: @refs[k].me.offsetTop + 'px'
+        left: @refs[k].me.offsetLeft + 'px'
+        width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
         wf['init'] = @state.wf[k]
         pos['init'] = p
@@ -984,11 +984,11 @@ Workflow = React.createClass
         wf['T' + idx] = @state.wf[k]
         pos['T' + idx] = p
     pos['start'] =
-      top: @refs['start'].me.style.top
-      left: @refs['start'].me.style.left
+      top: @refs['start'].me.offsetTop + 'px'
+      left: @refs['start'].me.offsetLeft + 'px'
     pos['end'] =
-      top: @refs['end'].me.style.top
-      left: @refs['end'].me.style.left
+      top: @refs['end'].me.offsetTop + 'px'
+      left: @refs['end'].me.offsetLeft + 'px'
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
     for tdx,t of wf
