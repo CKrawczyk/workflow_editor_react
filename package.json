@@ -4,7 +4,6 @@
   "description": "workfow editor for Panoptes writen using react",
   "main": "js/worflow_editor.js",
   "dependencies": {
-    "bootstrap": "^3.3.4",
     "jquery": "^2.1.4",
     "jquery-ui": "^1.10.5",
     "markdown-it": "^4.2.1",

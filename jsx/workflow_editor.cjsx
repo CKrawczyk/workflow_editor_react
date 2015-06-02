@@ -2,7 +2,6 @@ React = require 'react'
 Input = require 'react-bootstrap/lib/Input'
 Button = require 'react-bootstrap/lib/Button'
 ButtonGroup = require 'react-bootstrap/lib/ButtonGroup'
-Glyphicon = require 'react-bootstrap/lib/Glyphicon'
 OverlayTrigger = require 'react-bootstrap/lib/OverlayTrigger'
 Popover = require 'react-bootstrap/lib/Popover'
 Row = require 'react-bootstrap/lib/Row'
@@ -192,9 +191,9 @@ AnswerItem = React.createClass
 
     <li className='answer-item' id={@props.inputs.listId}>
       {lab + @props.inputs.idx + ': ' + tools}
-      <a className='close' onClick={@props.inputs.remove} data-idx={@props.inputs.idx}>&times;</a>
+      <a className='close noselect' onClick={@props.inputs.remove} data-idx={@props.inputs.idx}>&times;</a>
       <OverlayTrigger ref={@props.inputs.refMe} trigger='click' placement='right' overlay={overlay}>
-        <Glyphicon className='edit-icon' glyph='pencil' />
+        <i className='fa fa-pencil edit-icon'></i>
       </OverlayTrigger>
       <div className='lab' dangerouslySetInnerHTML={text}></div>
     </li>
@@ -584,10 +583,10 @@ Task = React.createClass
 
     <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
-        <span className='box-head'>
+        <span className='box-head noselect'>
           Single
         </span>
-        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
+        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
@@ -617,10 +616,10 @@ Task = React.createClass
 
     <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
-        <span className='box-head'>
+        <span className='box-head noselect'>
           Multiple
         </span>
-        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
+        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
@@ -654,10 +653,10 @@ Task = React.createClass
 
     <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
       <div className='drag-handel'>
-        <span className='box-head'>
+        <span className='box-head noselect'>
           Drawing
         </span>
-        <a className='close close-box' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
+        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
       </div>
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
