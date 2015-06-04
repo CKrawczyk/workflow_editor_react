@@ -46,7 +46,7 @@ exports.wf = {
     ]
   },
   "T3": {
-    "question": "Click the cat",
+    "instruction": "Click the cat",
     "help": "",
     "type": "drawing",
     "tools": [
@@ -58,7 +58,7 @@ exports.wf = {
     ]
   },
   "T4": {
-    "question": "Click the bacon",
+    "instruction": "Click the bacon",
     "help": "",
     "type": "drawing",
     "tools": [
@@ -105,4 +105,4 @@ exports.pos = {
     "top": "301px",
     "left": "1294px"
   }
-} 
+}

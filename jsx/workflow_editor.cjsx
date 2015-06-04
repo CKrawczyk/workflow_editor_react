@@ -336,7 +336,7 @@ Task = React.createClass
         draw_color: 'red'
         number: @props.task.answers.length
         help_text: @props.task.help
-        question: @props.task.question
+        question: if @props.task.type == 'drawing' then @props.task.instruction else @props.task.question
         task_number: @props.taskNumber
         required: @props.task.required
         task_init: true
@@ -397,7 +397,7 @@ Task = React.createClass
     ep.canvas.style['z-index'] = @state.task_number + 1
     eps = [ep]
     # make sure answer endpoints are drawn *after* the div is draggable and has its endpoint
-    if @state.type == 'single'
+    if @state.type != 'multiple'
       if @state.task_init
         # track uuid list manually since setState is called after the loop
         uuids = []
@@ -406,11 +406,13 @@ Task = React.createClass
           id = @getUuid(idx, uuid, uuids)
           uuids.push(id)
           uuid += 1
-          ep = jp.addEndpoint(id, commonA, {uuid: id})
+          switch @state.type
+            when 'single' then ep = jp.addEndpoint(id, commonA, {uuid: id})
+            when 'drawing' then ep = jp.addEndpoint(id, commonA_open, {uuid: id})
           ep.canvas.style['z-index'] = @state.task_number + 1
           eps.push(ep)
         @setUuid(null, uuid, uuids)
-    else
+    if @state.type != 'single'
       ep = jp.addEndpoint(@props.plumbId+'_name', commonA, {uuid: @props.plumbId + '_next'})
       ep.canvas.style['z-index'] = @state.task_number + 1
       eps.push(ep)
@@ -994,6 +996,33 @@ Workflow = React.createClass
 
   # Construct workflow json from nodes
   getWorkflow: ->
+    task_copy = (task) ->
+      switch task.type
+        when 'single'
+          {
+            'question': task.question
+            'help': task.help
+            'type': task.type
+            'required': task.required
+            'answers': task.answers
+          }
+        when 'multiple'
+          {
+            'question': task.question
+            'help': task.help
+            'type': task.type
+            'next': task.next
+            'required': task.required
+            'answers': task.answers
+          }
+        when 'drawing'
+          {
+            'instruction': task.question ? task.instruction
+            'help': task.help
+            'type': task.type
+            'next': task.next
+            'tools': task.tools
+          }
     wf = {}
     pos = {}
     for k, idx in @state.keys
@@ -1002,10 +1031,10 @@ Workflow = React.createClass
         left: @refs[k].me.offsetLeft + 'px'
         width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
-        wf['init'] = @state.wf[k]
+        wf['init'] = task_copy(@state.wf[k])
         pos['init'] = p
       else
-        wf['T' + idx] = @state.wf[k]
+        wf['T' + idx] = task_copy(@state.wf[k])
         pos['T' + idx] = p
     pos['start'] =
       top: @refs['start'].me.offsetTop + 'px'
@@ -1015,12 +1044,6 @@ Workflow = React.createClass
       left: @refs['end'].me.offsetLeft + 'px'
     # I have no idea how a drawing task gets 'answers' placed in it...
     # For now just remove it
-    for tdx,t of wf
-      if t.type == 'drawing'
-        # Change "question" to "instruction"
-        t['instruction'] = t['question']
-        delete t['question']
-        delete t['answers']
     @setState({wf_out: wf, pos_out: pos})
 
   onClear: ->
@@ -1046,6 +1069,9 @@ Workflow = React.createClass
       key_dict[k] = new_key
       current_keys.push(new_key)
       current_wf[new_key] = v
+      if v.type == 'drawing'
+        current_wf[new_key]['question'] = current_wf[new_key]['instruction']
+        #delete current_wf[new_key].instruction
       current_pos[new_key] = pos_in[k]
       current_uuids.push('task_' + tdx)
       if k == 'init'
@@ -1132,5 +1158,5 @@ clone = (obj) ->
   return JSON.parse(JSON.stringify(obj))
 #
 
-#React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
-React.render(<Workflow />, document.getElementById('insert'))
+React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
+#React.render(<Workflow />, document.getElementById('insert'))
