@@ -56,6 +56,24 @@ commonA =
     radius: 5
 #
 
+commonA_open =
+  connector: [ "Flowchart", { stub: 30, cornerRadius: 5, alwaysRespectStubs: false, midpoint: 0.5 } ]
+  #connector: ["Straight"]
+  #connectior: ["Bezier", { curviness: 150 }]
+  #connectior: ["State Machine"]
+  anchor: "Right"
+  isSource: true
+  endpoint: "Dot"
+  connectorStyle: connectorPaintStyle
+  hoverPaintStyle: endpointHoverStyle
+  connectorHoverStyle: connectorHoverStyle
+  paintStyle:
+    fillStyle: "transparent"
+    strokeStyle: "#000"
+    radius: 4
+    lineWidth: 2
+#
+
 commonT =
   anchor: "Left"
   isTarget: true
@@ -131,8 +149,10 @@ AnswerItem = React.createClass
 
   componentDidMount: ->
     # only add endpoints *after* the parent div is draggable (order matters here)!
-    if (not @props.inputs.task_init) and (@props.inputs.type == 'single')
-      ep = jp.addEndpoint(@props.inputs.listId, commonA, {uuid: @props.inputs.listId})
+    if (not @props.inputs.task_init) and (@props.inputs.type != 'multiple')
+      switch @props.inputs.type
+        when 'single' then ep = jp.addEndpoint(@props.inputs.listId, commonA, {uuid: @props.inputs.listId})
+        when 'drawing' then ep = jp.addEndpoint(@props.inputs.listId, commonA_open, {uuid: @props.inputs.listId})
       @props.inputs.setUuid(@props.inputs.listId)
       ep.canvas.style['z-index'] = @props.eps.zIndex
       @props.eps.add(ep)
@@ -142,7 +162,7 @@ AnswerItem = React.createClass
 
   componentWillUnmount: ->
     # properly remove the endpoint and detach all connectors for the task
-    if (@props.inputs.type == 'single')
+    if (@props.inputs.type != 'multiple')
       listId_split = @props.inputs.listId.split('_')
       base = listId_split[...-1].join('_') + '_'
       #jp.deleteEndpoint(@props.inputs.listId, false)
@@ -642,6 +662,11 @@ Task = React.createClass
       uuid:
         set: @setUuid
         get: @getUuid
+      eps:
+        add: @pushEps
+        remove: @removeEps
+        zIndex: @state.zIndex
+        endpoints: @state.endpoints
       tools: @state.draw_types
       colors: @state.draw_colors
       taskInit: @state.task_init
@@ -992,6 +1017,9 @@ Workflow = React.createClass
     # For now just remove it
     for tdx,t of wf
       if t.type == 'drawing'
+        # Change "question" to "instruction"
+        t['instruction'] = t['question']
+        delete t['question']
         delete t['answers']
     @setState({wf_out: wf, pos_out: pos})
 
