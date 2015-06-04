@@ -1065,7 +1065,7 @@ Workflow = React.createClass
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
       <Col xs={12}>
-        <h3>How to use:</h3>
+        <h3>How to use:</h3> 
         <ul>
           <li>Add a new task by clicking one of the three buttons at the top of the page</li>
           <li>Move the task node by clicking and dragging the top of the task anywhere you want (page auto scrolls)</li>
