@@ -129,7 +129,7 @@ HelpButton = React.createClass
         <Button onClick={@closeHelp} block>Save</Button>
       </Popover>
 
-    <OverlayTrigger ref='help_popover' trigger='click' placement='bottom' overlay={overlay}>
+    <OverlayTrigger ref='help_popover' trigger='click' placement='right' overlay={overlay} container={document.getElementById('editor')}>
       <Button className='add-help' bsSize="xsmall">Help Text</Button>
     </OverlayTrigger>
 #
