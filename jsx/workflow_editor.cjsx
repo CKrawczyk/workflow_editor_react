@@ -110,7 +110,22 @@ HelpButton = React.createClass
   render: ->
     overlay =
       <Popover className='help-popover' title='Help text'>
-        <Input className='help-text' type='textarea' onChange={@props.setHelp} rows=5 value={@props.help} />
+        <Row>
+          <Col xs={6}>
+            <h4>Enter help text as markdown</h4>
+          </Col>
+          <Col xs={6}>
+            <h4>Preview text as HTML</h4>
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={6}>
+            <Input className='help-text' type='textarea' onChange={@props.setHelp} rows=5 value={@props.help} />
+          </Col>
+          <Col xs={6}>
+            <div className='help-preview' dangerouslySetInnerHTML={{__html: md.render(@props.help)}}></div>
+          </Col>
+        </Row>
         <Button onClick={@closeHelp} block>Save</Button>
       </Popover>
 
@@ -1158,5 +1173,5 @@ clone = (obj) ->
   return JSON.parse(JSON.stringify(obj))
 #
 
-React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
-#React.render(<Workflow />, document.getElementById('insert'))
+#React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
+React.render(<Workflow />, document.getElementById('insert'))

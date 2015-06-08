@@ -125,12 +125,23 @@
 }
 
 .help-popover {
-  width: 300px;
+  width: 700px;
+  max-width: 1200px;
+}
+
+.help-preview {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ccc;
+  min-height: 106px;
+  padding: 2px 4px;
+  margin-bottom: 10px;
 }
 
 .help-text {
   width: 100%;
-  resize: none;
+  min-height: 106px;
+  resize: vertical !important;
   margin-bottom: 10px;
 }
 
