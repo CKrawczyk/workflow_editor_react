@@ -112,7 +112,7 @@ HelpButton = React.createClass
       <Popover className='help-popover' title='Help text'>
         <Row>
           <Col xs={6}>
-            <h4>Enter help text as <a href='https://markdown-it.github.io/'>markdown</a></h4>
+            <h4>Enter help text as <a href='https://markdown-it.github.io/' target='_blank'>markdown</a></h4>
           </Col>
           <Col xs={6}>
             <h4>Preview text as HTML</h4>
