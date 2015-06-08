@@ -1140,7 +1140,7 @@ Workflow = React.createClass
           <li>Move the task node by clicking and dragging the top of the task anywhere you want (page auto scrolls)</li>
           <li>The width of the task nodes can be resized by dragging the right side</li>
           <li>Enter the task's question into the top text box of the task node (this is a multi-line textarea)</li>
-          <li>Enter the task's help text by clicking the "Help Text" button</li>
+          <li>Enter the task's help text (and see markdown preview) by clicking the "Help Text" button</li>
           <li>Add answers/tools to the task by entering them into the bottom text box (this is a multi-line textarea) and clicking the "+"</li>
           <li>Markdown preview for answer/tool is shown in the node</li>
           <li>Edit answers/tools by clicking the "pencil" icon</li>
