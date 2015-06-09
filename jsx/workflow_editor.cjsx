@@ -109,7 +109,7 @@ HelpButton = React.createClass
 
   render: ->
     overlay =
-      <Popover className='help-popover' title='Help text'>
+      <Popover className='help-popover' title='Help text' arrowOffsetTop={121.1} arrowOffsetLeft={-11}>
         <Row>
           <Col xs={6}>
             <h4>Enter help text as <a href='https://markdown-it.github.io/' target='_blank'>markdown</a></h4>
@@ -199,14 +199,14 @@ AnswerItem = React.createClass
 
     if @props.inputs.type == 'drawing'
       overlay =
-        <Popover className='edit-popover' title='Edit Answer'>
+        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={123.2} arrowOffsetLeft={-11}>
           <Input className='help-text' type='textarea' onChange={@props.inputs.edit} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
           <TypeColorSelect nopad=true onDrawType={@props.inputs.editDrawType} onDrawColor={@props.inputs.editDrawColor} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
     else
       overlay =
-        <Popover className='edit-popover' title='Edit Answer'>
+        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={101.2} arrowOffsetLeft={-11}>
           <Input className='help-text' type='textarea' onChange={@props.inputs.edit} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
