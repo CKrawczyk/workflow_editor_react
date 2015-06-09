@@ -17,7 +17,8 @@
     "browserify": "^10.2.0",
     "coffee-reactify": "^3.0.0",
     "coffeeify": "^1.1.0",
-    "watchify": "^3.2.1"
+    "watchify": "^3.2.1",
+    "stylus": "^0.51.1"
   },
   "scripts": {
     "build": "browserify --transform coffee-reactify --ignore-transform coffeeify jsx/workflow_editor.cjsx -o js/workflow_editor.js",
@@ -26,6 +27,10 @@
   },
   "author": "Coleman Krawczyk",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CKrawczyk/workflow_editor_react"
+  },
   "browserify": {
     "transform": [
       "coffeeify"
