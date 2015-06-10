@@ -1007,18 +1007,8 @@ Workflow = React.createClass
         # for drawing tasks with sub task
         if sourceId.length == 4
           sub_task_list = [target_key]
-          while target_key != 'end'
-            switch current_wf[target_key].type
-              when 'single'
-                target_key = current_wf[target_key].answers[0].next
-              when 'multiple'
-                target_key = current_wf[target_key].next
-            if target_key?
-              sub_task_list.push(target_key)
-            else
-              target_key = 'end'
           adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
-          current_wf[source_key].answers[adx]['details'] = sub_task_list
+          current_wf[source_key].tools[adx]['details'] = sub_task_list
     @setState({wf: current_wf}, @getWorkflow)
     return
 
@@ -1039,7 +1029,7 @@ Workflow = React.createClass
         if (@refs[source_key]?) and (current_wf[source_key]?)
           if sourceId.length == 4
             adx =  @refs[source_key].state.uuids.indexOf(e.sourceId)
-            delete current_wf[source_key].answers[adx]['details']
+            delete current_wf[source_key].tools[adx]['details']
           else
             delete current_wf[source_key]['next']
     @setState({wf: current_wf}, @getWorkflow)
@@ -1047,7 +1037,7 @@ Workflow = React.createClass
 
   # Construct workflow json from nodes
   getWorkflow: ->
-    task_copy = (task) ->
+    task_copy = (task) =>
       switch task.type
         when 'single'
           {
@@ -1067,12 +1057,34 @@ Workflow = React.createClass
             'answers': task.answers
           }
         when 'drawing'
+          tools_out = []
+          for t in task.tools
+            tool = {
+              label: t.label
+              type: t.type
+              color: t.color
+            }
+            if t.details?
+              target_key = t.details[0]
+              sub_task_list = [target_key]
+              while target_key != 'end'
+                switch @state.wf[target_key].type
+                  when 'single'
+                    target_key = @state.wf[target_key].answers[0].next
+                  when 'multiple'
+                    target_key = @state.wf[target_key].next
+                if target_key?
+                  sub_task_list.push(target_key)
+                else
+                  target_key = 'end'
+              tool['details'] = sub_task_list
+            tools_out.push(tool)
           {
             'instruction': task.question ? task.instruction
             'help': task.help
             'type': task.type
             'next': task.next
-            'tools': task.tools
+            'tools': tools_out
           }
     wf = {}
     pos = {}
