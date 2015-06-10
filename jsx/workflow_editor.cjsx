@@ -1000,15 +1000,16 @@ Workflow = React.createClass
         else
           current_wf[source_key].answers[adx]['next'] = target_key
       else
-        if e.targetId == 'end'
-          delete current_wf[source_key]['next']
-        else
-          current_wf[source_key]['next'] = target_key
         # for drawing tasks with sub task
         if sourceId.length == 4
           sub_task_list = [target_key]
           adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
           current_wf[source_key].tools[adx]['details'] = sub_task_list
+        else
+          if e.targetId == 'end'
+            delete current_wf[source_key]['next']
+          else
+            current_wf[source_key]['next'] = target_key
     @setState({wf: current_wf}, @getWorkflow)
     return
 
