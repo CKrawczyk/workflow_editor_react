@@ -829,6 +829,7 @@ Workflow = React.createClass
       idx = @state.keys.indexOf(@state.init)
       c = ['start', @state.uuids[idx]]
       jp.connect({uuids: c})
+    last_list = []
     for wfKey,w of @state.wf
       idx = @state.keys.indexOf(wfKey)
       switch w.type
@@ -836,9 +837,9 @@ Workflow = React.createClass
           for a,adx in w.answers
             if a.next?
               ndx = @state.keys.indexOf(a.next)
-              c = [@state.uuids[idx] + '_answer_' + adx, @state.uuids[ndx]]
+              c = [@refs[wfKey].state.uuids[adx], @state.uuids[ndx]]
             else
-              c = [@state.uuids[idx] + '_answer_' + adx, 'end']
+              c = [@refs[wfKey].state.uuids[adx], 'end']
             jp.connect({uuids: c})
         else
           if w.next?
@@ -847,6 +848,20 @@ Workflow = React.createClass
           else
             c = [@state.uuids[idx] + '_next', 'end']
           jp.connect({uuids: c})
+          if w.type == 'drawing'
+            for a,adx in w.tools
+              if a.details?.length > 0
+                [st1, ..., st_last] = a.details
+                last_list.push(st_last)
+                ndx_sub = @state.uuids[@state.keys.indexOf(st1)]
+                ndx_pre = @refs[wfKey].state.uuids[0]
+                csub = [ndx_pre, ndx_sub]
+                jp.connect({uuids: csub})
+    for wfKey in last_list
+      idx = @state.keys.indexOf(wfKey)
+      all_uuids = @refs[wfKey].state.uuids
+      for ep in @refs[wfKey].state.endpoints[1...]
+        jp.detachAllConnections(ep.elementId)
     jp.bind('connection', @onConnect)
     jp.bind('connectionDetached', @onDetach)
     @getWorkflow()
@@ -977,17 +992,33 @@ Workflow = React.createClass
     if e.sourceId == 'start'
       @setState({init: target_key}, @getWorkflow)
       return
-    else if sourceId.length == 4
-      adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
-      if e.targetId == 'end'
-        delete current_wf[source_key].answers[adx]['next']
+    switch current_wf[source_key].type
+      when 'single'
+        adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+        if e.targetId == 'end'
+          delete current_wf[source_key].answers[adx]['next']
+        else
+          current_wf[source_key].answers[adx]['next'] = target_key
       else
-        current_wf[source_key].answers[adx]['next'] = target_key
-    else
-      if e.targetId == 'end'
-        delete current_wf[source_key]['next']
-      else
-        current_wf[source_key]['next'] = target_key
+        if e.targetId == 'end'
+          delete current_wf[source_key]['next']
+        else
+          current_wf[source_key]['next'] = target_key
+        # for drawing tasks with sub task
+        if sourceId.length == 4
+          sub_task_list = [target_key]
+          while target_key != 'end'
+            switch current_wf[target_key].type
+              when 'single'
+                target_key = current_wf[target_key].answers[0].next
+              when 'multiple'
+                target_key = current_wf[target_key].next
+            if target_key?
+              sub_task_list.push(target_key)
+            else
+              target_key = 'end'
+          adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+          current_wf[source_key].answers[adx]['details'] = sub_task_list
     @setState({wf: current_wf}, @getWorkflow)
     return
 
@@ -998,14 +1029,19 @@ Workflow = React.createClass
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
       return
-    if sourceId.length == 4
-      # if task removed via 'x' the detach events still fire so check for existance
-      if (@refs[source_key]?) and (current_wf[source_key]?)
-        adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
-        delete current_wf[source_key].answers[adx]['next']
-    else
-      if (@refs[source_key]?) and (current_wf[source_key]?)
-        delete current_wf[source_key]['next']
+    switch current_wf[source_key].type
+      when 'single'
+        # if task removed via 'x' the detach events still fire so check for existance
+        if (@refs[source_key]?) and (current_wf[source_key]?)
+          adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+          delete current_wf[source_key].answers[adx]['next']
+      else
+        if (@refs[source_key]?) and (current_wf[source_key]?)
+          if sourceId.length == 4
+            adx =  @refs[source_key].state.uuids.indexOf(e.sourceId)
+            delete current_wf[source_key].answers[adx]['details']
+          else
+            delete current_wf[source_key]['next']
     @setState({wf: current_wf}, @getWorkflow)
     return
 
@@ -1100,6 +1136,10 @@ Workflow = React.createClass
       else
         if v.next?
           v.next = key_dict[v.next]
+        if v.type == 'drawing'
+          for a in v.tools
+            if a.details?
+              a.details = (key_dict[sub_t] for sub_t in a.details)
     current_pos['start'] = pos_in['start']
     current_pos['end'] = pos_in['end']
     new_state =

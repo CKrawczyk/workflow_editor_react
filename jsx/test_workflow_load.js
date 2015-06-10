@@ -53,7 +53,8 @@ exports.wf = {
       {
         "label": "CAT!",
         "type": "point",
-        "color": "red"
+        "color": "red",
+        "details": ["T6", "T7"]
       }
     ]
   },
@@ -65,7 +66,53 @@ exports.wf = {
       {
         "label": "BACON!",
         "type": "point",
-        "color": "green"
+        "color": "green",
+        "details": ["T5", "T7"]
+      }
+    ]
+  },
+  "T5": {
+    "question": "sub_task_1",
+    "help": "",
+    "type": "multiple",
+    "next": "T7",
+    "required": false,
+    "answers": [
+      {
+        "label": "fun"
+      },
+      {
+        "label": "not fun"
+      }
+    ]
+  },
+  "T6": {
+    "question": "sub_task_2",
+    "help": "",
+    "type": "single",
+    "required": false,
+    "answers": [
+      {
+        "label": "fun",
+        "next": "T7"
+      },
+      {
+        "label": "not fun",
+        "next": "T7"
+      }
+    ]
+  },
+  "T7": {
+    "question": "sub_task_3",
+    "help": "",
+    "type": "multiple",
+    "required": false,
+    "answers": [
+      {
+        "label": "crap"
+      },
+      {
+        "label": "bubbles"
       }
     ]
   }
@@ -88,21 +135,36 @@ exports.pos = {
     "width": "196px"
   },
   "T3": {
-    "top": "109px",
-    "left": "795px",
+    "top": "11px",
+    "left": "737px",
     "width": "248px"
   },
   "T4": {
     "top": "400px",
-    "left": "795px",
+    "left": "736px",
     "width": "248px"
+  },
+  "T5": {
+    "top": "604px",
+    "left": "1079px",
+    "width": "200px"
+  },
+  "T6": {
+    "top": "146px",
+    "left": "1083px",
+    "width": "200px"
+  },
+  "T7": {
+    "top": "570px",
+    "left": "1462px",
+    "width": "200px"
   },
   "start": {
     "top": "338px",
     "left": "11px"
   },
   "end": {
-    "top": "301px",
-    "left": "1294px"
+    "top": "384px",
+    "left": "1885px"
   }
 }
