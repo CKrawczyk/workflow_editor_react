@@ -1,7 +1,7 @@
 exports.wf = {
   "init": {
     "question": "Is it a cat or bacon?",
-    "help": "",
+    "help": "Some help text\nWritten in _markdown_ :D",
     "required": true,
     "type": "single",
     "answers": [
@@ -146,7 +146,7 @@ exports.pos = {
   },
   "T5": {
     "top": "604px",
-    "left": "1079px",
+    "left": "1085px",
     "width": "200px"
   },
   "T6": {
