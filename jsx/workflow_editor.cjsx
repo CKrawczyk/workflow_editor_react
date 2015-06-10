@@ -1020,40 +1020,47 @@ Workflow = React.createClass
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
       return
-    switch current_wf[source_key].type
-      when 'single'
-        # if task removed via 'x' the detach events still fire so check for existance
-        if (@refs[source_key]?) and (current_wf[source_key]?)
-          adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
-          delete current_wf[source_key].answers[adx]['next']
-      else
-        if (@refs[source_key]?) and (current_wf[source_key]?)
-          if sourceId.length == 4
-            adx =  @refs[source_key].state.uuids.indexOf(e.sourceId)
-            delete current_wf[source_key].tools[adx]['details']
-          else
-            delete current_wf[source_key]['next']
-    @setState({wf: current_wf}, @getWorkflow)
+    if current_wf[source_key]?
+      switch current_wf[source_key].type
+        when 'single'
+          # if task removed via 'x' the detach events still fire so check for existance
+          if (@refs[source_key]?)
+            adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
+            delete current_wf[source_key].answers[adx]['next']
+        else
+          if (@refs[source_key]?)
+            if sourceId.length == 4
+              adx =  @refs[source_key].state.uuids.indexOf(e.sourceId)
+              delete current_wf[source_key].tools[adx]['details']
+            else
+              delete current_wf[source_key]['next']
+      @setState({wf: current_wf}, @getWorkflow)
     return
 
   # Construct workflow json from nodes
   getWorkflow: ->
-    task_copy = (task) =>
+    task_copy = (task, key_map) =>
       switch task.type
         when 'single'
+          answers_out = []
+          for a in task.answers
+            ans = {label: a.label}
+            if a.next
+              ans['next'] = key_map[a.next]
+            answers_out.push(ans)
           {
             'question': task.question
             'help': task.help
             'type': task.type
             'required': task.required
-            'answers': task.answers
+            'answers': answers_out
           }
         when 'multiple'
           {
             'question': task.question
             'help': task.help
             'type': task.type
-            'next': task.next
+            'next': key_map[task.next]
             'required': task.required
             'answers': task.answers
           }
@@ -1067,7 +1074,7 @@ Workflow = React.createClass
             }
             if t.details?
               target_key = t.details[0]
-              sub_task_list = [target_key]
+              sub_task_list = [key_map[target_key]]
               while target_key != 'end'
                 switch @state.wf[target_key].type
                   when 'single'
@@ -1075,30 +1082,33 @@ Workflow = React.createClass
                   when 'multiple'
                     target_key = @state.wf[target_key].next
                 if target_key?
-                  sub_task_list.push(target_key)
+                  sub_task_list.push(key_map[target_key])
                 else
                   target_key = 'end'
-              tool['details'] = sub_task_list
+              tool['details'] = sub_task_list #update with new IDX!!!
             tools_out.push(tool)
           {
             'instruction': task.question ? task.instruction
             'help': task.help
             'type': task.type
-            'next': task.next
+            'next': key_map[task.next]
             'tools': tools_out
           }
     wf = {}
     pos = {}
+    key_map = {}
+    for k, idx in @state.keys
+      key_map[k] = 'T' + idx
     for k, idx in @state.keys
       p =
         top: @refs[k].me.offsetTop + 'px'
         left: @refs[k].me.offsetLeft + 'px'
         width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
-        wf['init'] = task_copy(@state.wf[k])
+        wf['init'] = task_copy(@state.wf[k], key_map)
         pos['init'] = p
       else
-        wf['T' + idx] = task_copy(@state.wf[k])
+        wf['T' + idx] = task_copy(@state.wf[k], key_map)
         pos['T' + idx] = p
     pos['start'] =
       top: @refs['start'].me.offsetTop + 'px'
