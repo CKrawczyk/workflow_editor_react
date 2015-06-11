@@ -145,6 +145,11 @@
   margin-bottom: 10px;
 }
 
+.input-group-addon {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
 ._jsPlumb_connector {
   z-index: 0;
 }
