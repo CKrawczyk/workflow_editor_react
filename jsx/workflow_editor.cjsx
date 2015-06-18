@@ -40,6 +40,15 @@ connectorPaintStyle =
   outlineWidth: 1.5
 #
 
+connectorPaintStyleDashed =
+  lineWidth: 3
+  strokeStyle: "#000"
+  joinstyle: "round"
+  outlineColor: "white"
+  outlineWidth: 1.5
+  dashstyle: "4 2"
+#
+
 commonA =
   connector: [ "Flowchart", { stub: 30, cornerRadius: 5, alwaysRespectStubs: false, midpoint: 0.5 } ]
   #connector: ["Straight"]
@@ -64,7 +73,7 @@ commonA_open =
   anchor: "Right"
   isSource: true
   endpoint: "Dot"
-  connectorStyle: connectorPaintStyle
+  connectorStyle: connectorPaintStyleDashed
   hoverPaintStyle: endpointHoverStyle
   connectorHoverStyle: connectorHoverStyle
   paintStyle:
@@ -343,6 +352,7 @@ Task = React.createClass
       draw_colors = []
     if @props.task
       {
+        subTask: false
         answers: answers
         draw_types: draw_types
         draw_colors: draw_colors
@@ -366,6 +376,7 @@ Task = React.createClass
       }
     else
       {
+        subTask: false
         answers: []
         draw_types: []
         draw_colors: []
@@ -394,6 +405,9 @@ Task = React.createClass
     @width_min = parseFloat(window.getComputedStyle(@me)['min-width'])
     @width_max = parseFloat(window.getComputedStyle(@me)['max-width'])
     @bounding_rect = @me.getBoundingClientRect()
+    # keep track of previous task and if it is a sub-tasks
+    # @subTask = false
+    @previousTask = null
     # make the node resizable using jQuery-ui
     resize_options =
       handles: 'e'
@@ -593,7 +607,7 @@ Task = React.createClass
 
   # Useful for debugging
   onClick: (e) ->
-    #console.log(@state)
+    #console.log(@)
 
   # How to draw a Question (single) task
   renderSingle: ->
@@ -621,7 +635,7 @@ Task = React.createClass
     <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
         <span className='box-head noselect'>
-          Single
+          Single {'(sub)' if @state.subTask}
         </span>
         <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
@@ -654,7 +668,7 @@ Task = React.createClass
     <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
       <div className='drag-handel'>
         <span className='box-head noselect'>
-          Multiple
+          Multiple {'(sub)' if @state.subTask}
         </span>
         <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
@@ -991,7 +1005,10 @@ Workflow = React.createClass
     current_wf = @state.wf
     if e.sourceId == 'start'
       @setState({init: target_key}, @getWorkflow)
+      @refs[target_key]['previousTask'] = 'start'
       return
+    if e.targetId != 'end'
+      @refs[target_key]['previousTask'] = source_key
     switch current_wf[source_key].type
       when 'single'
         adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
@@ -1002,6 +1019,7 @@ Workflow = React.createClass
       else
         # for drawing tasks with sub task
         if sourceId.length == 4
+          @refs[target_key].setState({subTask: true})
           sub_task_list = [target_key]
           adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
           current_wf[source_key].tools[adx]['details'] = sub_task_list
@@ -1015,8 +1033,13 @@ Workflow = React.createClass
 
   onDetach: (e) ->
     sourceId = e.sourceId.split('_')
+    targetId = e.targetId.split('_')
     source_key = 'T' + sourceId[1]
+    target_key = 'T' + targetId[1]
     current_wf = @state.wf
+    if e.targetId != 'end'
+      @refs[target_key]['previousTask'] = null
+      @refs[target_key].setState({subTask: false})
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
       return
@@ -1085,7 +1108,7 @@ Workflow = React.createClass
                   sub_task_list.push(key_map[target_key])
                 else
                   target_key = 'end'
-              tool['details'] = sub_task_list #update with new IDX!!!
+              tool['details'] = sub_task_list
             tools_out.push(tool)
           {
             'instruction': task.question ? task.instruction
