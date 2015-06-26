@@ -1029,6 +1029,8 @@ Workflow = React.createClass
           else
             current_wf[source_key]['next'] = target_key
     @setState({wf: current_wf}, @getWorkflow)
+    if @refs[source_key].state.subTask and @refs[source_key].state.type == 'single'
+      console.log(@refs[source_key].state.uuids)
     return
 
   onDetach: (e) ->
