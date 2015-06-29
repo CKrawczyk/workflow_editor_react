@@ -282,4 +282,4 @@ exports.pos = {
     "top": "677px",
     "left": "3484.63px"
   }
-} 
+}
