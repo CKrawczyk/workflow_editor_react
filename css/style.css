@@ -251,3 +251,11 @@ textarea.form-control {
 .ui-resizable-e {
   cursor: ew-resize;
 }
+
+.smooth {
+  background-position: 0px -3800px;
+  background: transparent url("http://static.zooniverse.org/www.galaxyzoo.org/images/workflow.png") no-repeat scroll left top;
+  width: 100px;
+  height: 100px;
+  margin: 0px auto;
+}

@@ -12,7 +12,7 @@ Ex2 = require './test_workflow_load_gz.js'
 $ = jQuery = require 'jquery'
 require 'jquery-ui/resizable'
 
-md = MarkdownIt({breaks: true})
+md = MarkdownIt({breaks: true, html: true})
   .use(require 'markdown-it-emoji')
   .use(require 'markdown-it-sub')
   .use(require 'markdown-it-sup')
