@@ -19,6 +19,7 @@ md = MarkdownIt({breaks: true, html: true})
   .use(require 'markdown-it-sup')
 
 # need to make a new jsPlumb instance to work with
+# Note: any class that uses jp must stay in this file so all components use the same instance
 jp = jsPlumb.getInstance()
 
 # Render the task name box at the top of the node

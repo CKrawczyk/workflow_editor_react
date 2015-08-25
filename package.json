@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "workfow editor for Panoptes writen using react",
   "main": "js/worflow_editor.js",
+  "coffeelintConfig": {
+    "max_line_length": {
+      "name": "max_line_length",
+      "level": "ignore"
+    },
+    "coffeelint": {
+      "transforms": [
+        "coffee-react-transform"
+      ]
+    }
+  },
   "dependencies": {
     "jquery": "^2.1.4",
     "jquery-ui": "^1.10.5",
@@ -15,10 +26,11 @@
   },
   "devDependencies": {
     "browserify": "^10.2.0",
+    "coffee-react-transform": "^3.2.0",
     "coffee-reactify": "^3.0.0",
     "coffeeify": "^1.1.0",
-    "watchify": "^3.2.1",
-    "stylus": "^0.51.1"
+    "stylus": "^0.51.1",
+    "watchify": "^3.2.1"
   },
   "scripts": {
     "build": "browserify --transform coffee-reactify --ignore-transform coffeeify jsx/workflow_editor.cjsx -o js/workflow_editor.js",

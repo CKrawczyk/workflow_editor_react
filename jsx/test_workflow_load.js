@@ -116,7 +116,7 @@ exports.wf = {
       }
     ]
   }
-}
+};
 
 exports.pos = {
   "init": {
@@ -167,4 +167,4 @@ exports.pos = {
     "top": "384px",
     "left": "1885px"
   }
-}
+};
