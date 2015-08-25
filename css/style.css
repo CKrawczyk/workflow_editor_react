@@ -6,8 +6,8 @@
   margin-left: 10px;
   margin-bottom: 5px;
   width: 30%;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .answer-add {
@@ -31,7 +31,7 @@
   border-width: 1px;
   border-radius: 15px;
   position: absolute;
-  overflow: none;
+  overflow: hidden;
 }
 
 .box-head {
@@ -43,8 +43,8 @@
 }
 
 .checkbox {
-  margin-top: 0px;
-  margin-bottom: 0px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .close {
@@ -73,6 +73,7 @@
   cursor:  move;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+  background-color: #000;
   background-color: rgba(0,0,0,.3);
 }
 
@@ -82,6 +83,7 @@
 }
 
 .drawing-box > .drag-handel {
+  background-color: rgb(183,96,133);
   background-color: rgba(183,96,133,.3);
 }
 
@@ -99,7 +101,7 @@
   width: 300px;
 }
 
-#editor {
+.editor {
   width: 98%;
   height: 800px;
   border-style: solid;
@@ -110,8 +112,8 @@
   overflow: scroll;
 }
 
-#end,
-#start {
+.end,
+.start {
   min-width: 30px;
   width: 75px;
   height: 30px;
@@ -121,7 +123,7 @@
 }
 
 .form-group {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 .help-popover {
@@ -173,9 +175,10 @@
 }
 
 .lab {
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
   padding-left: 15px;
+  background-color: rgb(255,255,255);
   background-color: rgba(255,255,255,.5);
   border: none
 }
@@ -185,6 +188,7 @@
 }
 
 .multi-box > .drag-handel {
+  background-color: rgb(85,100,171);
   background-color: rgba(85,100,171,.3);
 }
 
@@ -210,31 +214,27 @@ path, ._jsPlumb_endpoint {
 }
 
 .question-box > .drag-handel {
+  background-color: rgb(56,116,92);
   background-color: rgba(56,116,92,.3);
 }
 
 .req {
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding: 0 15px;
   float: right;
   clear: both;
 }
 
 select.form-control {
-  padding: 0px;
+  padding: 0;
 }
 
 .select-row {
-  margin: 0px;
+  margin: 0;
   margin-bottom: 10px;
 }
 
 .task {
-  padding: 10px;
-  padding-bottom: 0px;
-  padding-top: 0px;
+  padding: 0 10px;
   margin-top: 5px;
 }
 
@@ -253,9 +253,9 @@ textarea.form-control {
 }
 
 .smooth {
-  background-position: 0px -3800px;
+  background-position: 0 -3800px;
   background: transparent url("http://static.zooniverse.org/www.galaxyzoo.org/images/workflow.png") no-repeat scroll left top;
   width: 100px;
   height: 100px;
-  margin: 0px auto;
+  margin: 0 auto;
 }

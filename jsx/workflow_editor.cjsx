@@ -1,4 +1,5 @@
 React = require 'react'
+Sty = require './jsplumb_style.cjsx'
 Input = require 'react-bootstrap/lib/Input'
 Button = require 'react-bootstrap/lib/Button'
 ButtonGroup = require 'react-bootstrap/lib/ButtonGroup'
@@ -19,82 +20,6 @@ md = MarkdownIt({breaks: true, html: true})
 
 # need to make a new jsPlumb instance to work with
 jp = jsPlumb.getInstance()
-
-# define the styles for various jsPlumb elements
-connectorHoverStyle =
-  lineWidth: 3
-  strokeStyle: "#888"
-  outlineWidth: 1.5
-  outlineColor: "white"
-#
-
-endpointHoverStyle =
-  fillStyle: "#888"
-#
-
-connectorPaintStyle =
-  lineWidth: 3
-  strokeStyle: "#000"
-  joinstyle: "round"
-  outlineColor: "white"
-  outlineWidth: 1.5
-#
-
-connectorPaintStyleDashed =
-  lineWidth: 3
-  strokeStyle: "#000"
-  joinstyle: "round"
-  outlineColor: "white"
-  outlineWidth: 1.5
-  dashstyle: "4 2"
-#
-
-commonA =
-  connector: [ "Flowchart", { stub: 30, cornerRadius: 5, alwaysRespectStubs: false, midpoint: 0.5 } ]
-  #connector: ["Straight"]
-  #connectior: ["Bezier", { curviness: 150 }]
-  #connectior: ["State Machine"]
-  anchor: "Right"
-  isSource: true
-  endpoint: "Dot"
-  connectorStyle: connectorPaintStyle
-  hoverPaintStyle: endpointHoverStyle
-  connectorHoverStyle: connectorHoverStyle
-  paintStyle:
-    fillStyle: "#000"
-    radius: 5
-#
-
-commonA_open =
-  connector: [ "Flowchart", { stub: 30, cornerRadius: 5, alwaysRespectStubs: false, midpoint: 0.5 } ]
-  #connector: ["Straight"]
-  #connectior: ["Bezier", { curviness: 150 }]
-  #connectior: ["State Machine"]
-  anchor: "Right"
-  isSource: true
-  endpoint: "Dot"
-  connectorStyle: connectorPaintStyleDashed
-  hoverPaintStyle: endpointHoverStyle
-  connectorHoverStyle: connectorHoverStyle
-  paintStyle:
-    fillStyle: "transparent"
-    strokeStyle: "#000"
-    radius: 4
-    lineWidth: 2
-#
-
-commonT =
-  anchor: "Left"
-  isTarget: true
-  endpoint: "Dot"
-  maxConnections: -1
-  hoverPaintStyle: endpointHoverStyle
-  connectorHoverStyle: connectorHoverStyle
-  dropOptions: { hoverClass: "hover", activeClass: "active" }
-  paintStyle:
-    fillStyle: "#000"
-    radius: 7
-#
 
 # Render the task name box at the top of the node
 TaskName = React.createClass
@@ -175,8 +100,8 @@ AnswerItem = React.createClass
     # only add endpoints *after* the parent div is draggable (order matters here)!
     if (not @props.inputs.task_init) and (@props.inputs.type != 'multiple')
       switch @props.inputs.type
-        when 'single' then ep = jp.addEndpoint(@props.inputs.listId, commonA, {uuid: @props.inputs.listId})
-        when 'drawing' then ep = jp.addEndpoint(@props.inputs.listId, commonA_open, {uuid: @props.inputs.listId})
+        when 'single' then ep = jp.addEndpoint(@props.inputs.listId, Sty.commonA, {uuid: @props.inputs.listId})
+        when 'drawing' then ep = jp.addEndpoint(@props.inputs.listId, Sty.commonA_open, {uuid: @props.inputs.listId})
       @props.inputs.setUuid(@props.inputs.listId)
       ep.canvas.style['z-index'] = @props.eps.zIndex
       @props.eps.add(ep)
@@ -422,7 +347,7 @@ Task = React.createClass
       stop: @props.onMove
     jp.draggable(@props.plumbId, drag_options)
     # add an "input" endpoint
-    ep = jp.addEndpoint(@props.plumbId, commonT, {uuid: @props.plumbId})
+    ep = jp.addEndpoint(@props.plumbId, Sty.commonT, {uuid: @props.plumbId})
     ep.canvas.style['z-index'] = @state.task_number + 1
     eps = [ep]
     # make sure answer endpoints are drawn *after* the div is draggable and has its endpoint
@@ -436,13 +361,13 @@ Task = React.createClass
           uuids.push(id)
           uuid += 1
           switch @state.type
-            when 'single' then ep = jp.addEndpoint(id, commonA, {uuid: id})
-            when 'drawing' then ep = jp.addEndpoint(id, commonA_open, {uuid: id})
+            when 'single' then ep = jp.addEndpoint(id, Sty.commonA, {uuid: id})
+            when 'drawing' then ep = jp.addEndpoint(id, Sty.commonA_open, {uuid: id})
           ep.canvas.style['z-index'] = @state.task_number + 1
           eps.push(ep)
         @setUuid(null, uuid, uuids)
     if @state.type != 'single'
-      ep = jp.addEndpoint(@props.plumbId+'_name', commonA, {uuid: @props.plumbId + '_next'})
+      ep = jp.addEndpoint(@props.plumbId+'_name', Sty.commonA, {uuid: @props.plumbId + '_next'})
       ep.canvas.style['z-index'] = @state.task_number + 1
       eps.push(ep)
     @setState({task_init: false})
@@ -760,8 +685,8 @@ StartEndNode = React.createClass
       stop: @props.onMove
     jp.draggable(@props.type, drag_options)
     switch @props.type
-      when 'start' then ep = jp.addEndpoint(@props.type, commonA, {uuid: @props.type})
-      when 'end' then ep = jp.addEndpoint(@props.type, commonT, {uuid: @props.type})
+      when 'start' then ep = jp.addEndpoint(@props.type, Sty.commonA, {uuid: @props.type})
+      when 'end' then ep = jp.addEndpoint(@props.type, Sty.commonT, {uuid: @props.type})
     ep.canvas.style['z-index'] = @state.zIndex
     @ep = ep
 
@@ -789,7 +714,8 @@ StartEndNode = React.createClass
     switch @props.type
       when 'start' then style['left'] = '0%'
       when 'end' then style['right'] = '0%'
-    <div className='box-end' id={@props.type} style={style}>
+    classString = 'box-end ' + @props.type
+    <div className={classString} id={@props.type} style={style}>
       {@props.type.charAt(0).toUpperCase() + @props.type.slice(1)}
     </div>
 
@@ -1216,7 +1142,7 @@ Workflow = React.createClass
         <div style={{fontSize: 26}}> Add Task:</div>
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
-      <Col xs={12} id='editor'>
+      <Col xs={12} id='editor' className='editor'>
         <StartEndNode type='start' ref='start' onMove={@getWorkflow} />
         <StartEndNode type='end'  ref='end' onMove={@getWorkflow} />
         {@createTask(idx, name) for name, idx in @state.keys}
