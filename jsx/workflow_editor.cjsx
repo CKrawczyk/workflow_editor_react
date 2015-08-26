@@ -18,10 +18,6 @@ md = MarkdownIt({breaks: true, html: true})
   .use(require 'markdown-it-sub')
   .use(require 'markdown-it-sup')
 
-# need to make a new jsPlumb instance to work with
-# Note: any class that uses jp must stay in this file so all components use the same instance
-jp = jsPlumb.getInstance()
-
 # Render the task name box at the top of the node
 TaskName = React.createClass
   displayName: 'TaskName'
@@ -101,13 +97,13 @@ AnswerItem = React.createClass
     # only add endpoints *after* the parent div is draggable (order matters here)!
     if (not @props.inputs.task_init) and (@props.inputs.type != 'multiple')
       switch @props.inputs.type
-        when 'single' then ep = jp.addEndpoint(@props.inputs.listId, Sty.commonA, {uuid: @props.inputs.listId})
-        when 'drawing' then ep = jp.addEndpoint(@props.inputs.listId, Sty.commonA_open, {uuid: @props.inputs.listId})
+        when 'single' then ep = @props.jp.addEndpoint(@props.inputs.listId, Sty.commonA, {uuid: @props.inputs.listId})
+        when 'drawing' then ep = @props.jp.addEndpoint(@props.inputs.listId, Sty.commonA_open, {uuid: @props.inputs.listId})
       @props.inputs.setUuid(@props.inputs.listId)
       ep.canvas.style['z-index'] = @props.eps.zIndex
       @props.eps.add(ep)
-      jp.revalidate(ep.elementId, null, true)
-      jp.dragManager.updateOffsets(@props.inputs.plumbId)
+      @props.jp.revalidate(ep.elementId, null, true)
+      @props.jp.dragManager.updateOffsets(@props.inputs.plumbId)
     return
 
   componentWillUnmount: ->
@@ -116,11 +112,11 @@ AnswerItem = React.createClass
       listId_split = @props.inputs.listId.split('_')
       base = listId_split[...-1].join('_') + '_'
       #jp.deleteEndpoint(@props.inputs.listId, false)
-      jp.removeAllEndpoints(@props.inputs.listId)
+      @props.jp.removeAllEndpoints(@props.inputs.listId)
       [..., ep] = @props.eps.endpoints
-      jp.dragManager.endpointDeleted(ep)
+      @props.jp.dragManager.endpointDeleted(ep)
       for ep in @props.eps.endpoints[1...]
-        jp.detachAllConnections(ep.elementId)
+        @props.jp.detachAllConnections(ep.elementId)
       @props.eps.remove()
     return
 
@@ -186,9 +182,9 @@ AnswerList = React.createClass
       # since jsPlumb's draggable cache's the old positions of the nodes update all offsets by hand
       for ep in @props.inputs.eps.endpoints[1...]
         # recaculate the node position based on the DOM element
-        jp.revalidate(ep.elementId, null, true)
+        @props.jp.revalidate(ep.elementId, null, true)
       # tell jsPlumb's dragManager to update the offsets
-      jp.dragManager.updateOffsets(@props.plumbId)
+      @props.jp.dragManager.updateOffsets(@props.plumbId)
       @setState({removing: false})
 
   createAnswer: (idx, text, N, getUuid) ->
@@ -211,7 +207,7 @@ AnswerList = React.createClass
       inputs.editDrawType = @props.inputs.editDrawType
       inputs.editDrawColor = @props.inputs.editDrawColor
 
-    <AnswerItem key={'AI_' + idx} inputs={inputs} eps={@props.inputs.eps} />
+    <AnswerItem jp={@props.jp} key={'AI_' + idx} inputs={inputs} eps={@props.inputs.eps} />
 
   render: ->
     N = @props.inputs.answers.length
@@ -346,9 +342,9 @@ Task = React.createClass
       handle: '.drag-handel'
       start: @onDrag
       stop: @props.onMove
-    jp.draggable(@props.plumbId, drag_options)
+    @props.jp.draggable(@props.plumbId, drag_options)
     # add an "input" endpoint
-    ep = jp.addEndpoint(@props.plumbId, Sty.commonT, {uuid: @props.plumbId})
+    ep = @props.jp.addEndpoint(@props.plumbId, Sty.commonT, {uuid: @props.plumbId})
     ep.canvas.style['z-index'] = @state.task_number + 1
     eps = [ep]
     # make sure answer endpoints are drawn *after* the div is draggable and has its endpoint
@@ -362,13 +358,13 @@ Task = React.createClass
           uuids.push(id)
           uuid += 1
           switch @state.type
-            when 'single' then ep = jp.addEndpoint(id, Sty.commonA, {uuid: id})
-            when 'drawing' then ep = jp.addEndpoint(id, Sty.commonA_open, {uuid: id})
+            when 'single' then ep = @props.jp.addEndpoint(id, Sty.commonA, {uuid: id})
+            when 'drawing' then ep = @props.jp.addEndpoint(id, Sty.commonA_open, {uuid: id})
           ep.canvas.style['z-index'] = @state.task_number + 1
           eps.push(ep)
         @setUuid(null, uuid, uuids)
     if @state.type != 'single'
-      ep = jp.addEndpoint(@props.plumbId+'_name', Sty.commonA, {uuid: @props.plumbId + '_next'})
+      ep = @props.jp.addEndpoint(@props.plumbId+'_name', Sty.commonA, {uuid: @props.plumbId + '_next'})
       ep.canvas.style['z-index'] = @state.task_number + 1
       eps.push(ep)
     @setState({task_init: false})
@@ -416,7 +412,7 @@ Task = React.createClass
   # when the node is removed clean up all endpoints
   componentWillUnmount: ->
     for ep in @state.endpoints
-      jp.deleteEndpoint(ep)
+      @props.jp.deleteEndpoint(ep)
     return
 
   # Callback for name change
@@ -517,17 +513,17 @@ Task = React.createClass
       else if new_width > @width_max
         delta = @width_max - @bounding_rect.width
       for ep in @state.endpoints[1...]
-        offset = jp.getOffset(ep.elementId)
+        offset = @props.jp.getOffset(ep.elementId)
         offset.left += delta
-        jp.repaint(ep.elementId,offset)
-        jp.dragManager.updateOffsets(@props.plumbId)
+        @props.jp.repaint(ep.elementId,offset)
+        @props.jp.dragManager.updateOffsets(@props.plumbId)
     return
 
   # Callback after resize to save endpoints' positions
   onResizeStop: (e) ->
     @bounding_rect = @me.getBoundingClientRect()
     for ep in @state.endpoints[1...]
-      jp.revalidate(ep.elementId, null, true)
+      @props.jp.revalidate(ep.elementId, null, true)
     @props.onMove()
     return
 
@@ -569,7 +565,7 @@ Task = React.createClass
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList inputs={inputs} plumbId={@props.plumbId} />
+      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
     </div>
 
@@ -602,7 +598,7 @@ Task = React.createClass
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList  inputs={inputs} plumbId={@props.plumbId} />
+      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
     </div>
 
@@ -643,7 +639,7 @@ Task = React.createClass
       </div>
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
-      <AnswerList inputs={inputs} plumbId={@props.plumbId} />
+      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
       <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
       <TypeColorSelect  onDrawType={@onDrawType} onDrawColor={@onDrawColor} drawType={@state.draw_type} drawColor={@state.draw_color} />
     </div>
@@ -684,10 +680,10 @@ StartEndNode = React.createClass
     drag_options =
       start: @onDrag
       stop: @props.onMove
-    jp.draggable(@props.type, drag_options)
+    @props.jp.draggable(@props.type, drag_options)
     switch @props.type
-      when 'start' then ep = jp.addEndpoint(@props.type, Sty.commonA, {uuid: @props.type})
-      when 'end' then ep = jp.addEndpoint(@props.type, Sty.commonT, {uuid: @props.type})
+      when 'start' then ep = @props.jp.addEndpoint(@props.type, Sty.commonA, {uuid: @props.type})
+      when 'end' then ep = @props.jp.addEndpoint(@props.type, Sty.commonT, {uuid: @props.type})
     ep.canvas.style['z-index'] = @state.zIndex
     @ep = ep
 
@@ -700,7 +696,7 @@ StartEndNode = React.createClass
         top: pos.top + ''
     @me.style.left = if pos.left[-2..] == 'px' then pos.left else pos.left + 'px'
     @me.style.top = if pos.top[-2..] == 'px' then pos.top else pos.top + 'px'
-    jp.revalidate(@ep.elementId, null, true)
+    @props.jp.revalidate(@ep.elementId, null, true)
 
   onDrag: ->
     if @state.zIndex < max_z
@@ -769,7 +765,7 @@ Workflow = React.createClass
     if @state.init?
       idx = @state.keys.indexOf(@state.init)
       c = ['start', @state.uuids[idx]]
-      jp.connect({uuids: c})
+      @props.jp.connect({uuids: c})
     last_list = []
     for wfKey,w of @state.wf
       idx = @state.keys.indexOf(wfKey)
@@ -781,14 +777,14 @@ Workflow = React.createClass
               c = [@refs[wfKey].state.uuids[adx], @state.uuids[ndx]]
             else
               c = [@refs[wfKey].state.uuids[adx], 'end']
-            jp.connect({uuids: c})
+            @props.jp.connect({uuids: c})
         else
           if w.next?
             ndx = @state.keys.indexOf(w.next)
             c = [@state.uuids[idx] + '_next', @state.uuids[ndx]]
           else
             c = [@state.uuids[idx] + '_next', 'end']
-          jp.connect({uuids: c})
+          @props.jp.connect({uuids: c})
           if w.type == 'drawing'
             for a,adx in w.tools
               if a.details?.length > 0
@@ -797,14 +793,14 @@ Workflow = React.createClass
                 ndx_sub = @state.uuids[@state.keys.indexOf(st1)]
                 ndx_pre = @refs[wfKey].state.uuids[0]
                 csub = [ndx_pre, ndx_sub]
-                jp.connect({uuids: csub})
+                @props.jp.connect({uuids: csub})
     for wfKey in last_list
       idx = @state.keys.indexOf(wfKey)
       all_uuids = @refs[wfKey].state.uuids
       for ep in @refs[wfKey].state.endpoints[1...]
-        jp.detachAllConnections(ep.elementId)
-    jp.bind('connection', @onConnect)
-    jp.bind('connectionDetached', @onDetach)
+        @props.jp.detachAllConnections(ep.elementId)
+    @props.jp.bind('connection', @onConnect)
+    @props.jp.bind('connectionDetached', @onDetach)
     @getWorkflow()
 
   taskUpdate: (taskState) ->
@@ -819,7 +815,7 @@ Workflow = React.createClass
         ans = []
         for lab, idx in taskState.answers
           a = {label: lab}
-          c = jp.getConnections({source: taskState.uuids[idx]})
+          c = @props.jp.getConnections({source: taskState.uuids[idx]})
           if c.length > 0
             a['next'] = 'T' + c[0].targetId.split('_')[1]
           ans.push(a)
@@ -1135,7 +1131,7 @@ Workflow = React.createClass
   # Callback to make one task
   createTask: (idx, name) ->
     id = @getUuid(idx)
-    <Task task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} onUpdate={@taskUpdate} onMove={@getWorkflow} />
+    <Task jp={@props.jp} task={@state.wf[name]} type={@state.wf[name].type} taskNumber={idx} pos={@state.pos[name]} plumbId={id} key={id} wfKey={name} ref={name} remove={@removeTask} onUpdate={@taskUpdate} onMove={@getWorkflow} />
 
   render: ->
     <Row>
@@ -1144,8 +1140,8 @@ Workflow = React.createClass
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
       <Col xs={12} id='editor' className='editor'>
-        <StartEndNode type='start' ref='start' onMove={@getWorkflow} />
-        <StartEndNode type='end'  ref='end' onMove={@getWorkflow} />
+        <StartEndNode jp={@props.jp} type='start' ref='start' onMove={@getWorkflow} />
+        <StartEndNode jp={@props.jp} type='end'  ref='end' onMove={@getWorkflow} />
         {@createTask(idx, name) for name, idx in @state.keys}
       </Col>
       <Col xs={12}>
@@ -1188,5 +1184,8 @@ clone = (obj) ->
   return JSON.parse(JSON.stringify(obj))
 #
 
-#React.render(<Workflow wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
-React.render(<Workflow />, document.getElementById('insert'))
+# need to make a new jsPlumb instance to work with
+jp = jsPlumb.getInstance()
+
+#React.render(<Workflow jp={jp} wf={clone(Ex1.wf)} pos={clone(Ex1.pos)} />, document.getElementById('insert'))
+React.render(<Workflow jp={jp} />, document.getElementById('insert'))
