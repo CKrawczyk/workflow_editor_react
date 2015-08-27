@@ -266,7 +266,7 @@ Workflow = React.createClass
     source_key = 'T' + sourceId[1]
     target_key = 'T' + targetId[1]
     current_wf = @state.wf
-    if e.targetId != 'end'
+    if (e.targetId != 'end') and (@refs[target_key])
       @refs[target_key]['previousTask'] = null
       @refs[target_key].setState({subTask: false})
     if e.sourceId == 'start'
