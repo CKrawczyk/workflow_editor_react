@@ -33,11 +33,8 @@ AnswerItem = React.createClass
   componentWillUnmount: ->
     # properly remove the endpoint and detach all connectors for the task
     if (@props.inputs.type != 'multiple')
-      listId_split = @props.inputs.listId.split('_')
-      base = listId_split[...-1].join('_') + '_'
-      #jp.deleteEndpoint(@props.inputs.listId, false)
-      @props.jp.removeAllEndpoints(@props.inputs.listId)
       [..., ep] = @props.eps.endpoints
+      @props.jp.deleteEndpoint(ep)
       @props.jp.dragManager.endpointDeleted(ep)
       for ep in @props.eps.endpoints[1...]
         @props.jp.detachAllConnections(ep.elementId)
