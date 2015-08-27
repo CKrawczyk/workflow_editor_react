@@ -8,7 +8,7 @@ Ex2 = require './test_workflow_load_gz.js'
 Tasks = require './task.cjsx'
 Task = Tasks.Task
 StartEndNode = Tasks.StartEndNode
-#test
+
 AddTaskButtons = React.createClass
   displayName: 'AddTaskButtons'
 
