@@ -32,6 +32,8 @@ AnswerItem = React.createClass
 
   componentWillUnmount: ->
     # properly remove the endpoint and detach all connectors for the task
+    # always remove the final endpoint in the list since the remaining items will all move up
+    # the multiple task does not have endpoins for each answer
     if (@props.inputs.type != 'multiple')
       [..., ep] = @props.eps.endpoints
       @props.jp.deleteEndpoint(ep)
@@ -49,6 +51,7 @@ AnswerItem = React.createClass
     closeMe = =>
       @refs[@props.inputs.refMe].toggle()
 
+    # format the popup overlay
     if @props.inputs.type == 'drawing'
       overlay =
         <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={123.2} arrowOffsetLeft={-11}>
@@ -63,12 +66,14 @@ AnswerItem = React.createClass
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
 
+    # make sure input text is not blank before converting markdown
     if not @isEmptyStr(@props.inputs.text)
       text = {__html: md.render(@props.inputs.text)}
     else
       # if input is just whitespace make sure something is rendered
       text = {__html: '&nbsp;'}
 
+    # format label
     if @props.inputs.type == 'drawing'
       lab = 'T '
       tools = @props.inputs.tool + ', ' + @props.inputs.color

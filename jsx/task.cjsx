@@ -48,9 +48,7 @@ Task = React.createClass
         uuid: 0
         uuids: []
         type: @props.type
-        idx: @props.idx
         plumbId: @props.plumbId
-        push_update: false
       }
     else
       {
@@ -72,11 +70,12 @@ Task = React.createClass
         uuid: 0
         uuids: []
         type: @props.type
-        idx: @props.idx
         plumbId: @props.plumbId
-        push_update: false
       }
 
+  # add endpoins to task and get uniuque id's for answer list if needed
+  # grab values needed for resize and move events
+  # hook up resize and move events
   componentDidMount: ->
     # set up some variables to use during resize events
     @me = React.findDOMNode(this)
@@ -104,33 +103,41 @@ Task = React.createClass
     ep.canvas.style['z-index'] = @state.task_number + 1
     eps = [ep]
     # make sure answer endpoints are drawn *after* the div is draggable and has its endpoint
-    if @state.type != 'multiple'
-      if @state.task_init
-        # track uuid list manually since setState is called after the loop
-        uuids = []
-        uuid = 0
-        for idx in [0...@state.answers.length]
-          id = @getUuid(idx, uuid, uuids)
-          uuids.push(id)
-          uuid += 1
-          switch @state.type
-            when 'single' then ep = @props.jp.addEndpoint(id, Sty.commonA, {uuid: id})
-            when 'drawing' then ep = @props.jp.addEndpoint(id, Sty.commonA_open, {uuid: id})
-          ep.canvas.style['z-index'] = @state.task_number + 1
-          eps.push(ep)
-        @setUuid(null, uuid, uuids)
+    if (@state.type != 'multiple') and (@state.task_init)
+      # track uuid list manually since setState is called after the loop
+      uuids = []
+      uuid = 0
+      for idx in [0...@state.answers.length]
+        id = @getUuid(idx, uuid, uuids)
+        uuids.push(id)
+        uuid += 1
+        switch @state.type
+          when 'single' then ep = @props.jp.addEndpoint(id, Sty.commonA, {uuid: id})
+          when 'drawing' then ep = @props.jp.addEndpoint(id, Sty.commonA_open, {uuid: id})
+        ep.canvas.style['z-index'] = @state.task_number + 1
+        eps.push(ep)
+      @setUuid(null, uuid, uuids)
     if @state.type != 'single'
       ep = @props.jp.addEndpoint(@props.plumbId+'_name', Sty.commonA, {uuid: @props.plumbId + '_next'})
       ep.canvas.style['z-index'] = @state.task_number + 1
       eps.push(ep)
-    @setState({task_init: false})
-    @setState({endpoints: eps})
+    @setState({task_init: false, endpoints: eps})
+    return
+
+  # when the node is removed clean up all endpoints
+  componentWillUnmount: ->
+    for ep in @state.endpoints
+      @props.jp.deleteEndpoint(ep)
     return
 
   # Make sure workflow knows about updates
+  # this funcion is ment to be called in setState commands
   workflowUpdate: ->
     if not @state.task_init
       @props.onUpdate(@state)
+
+  # define some setters and getters
+  #==========================
 
   # Keep track of unique uuids to use for each answer DOM element
   # These can't be re-used after removal, otherwise the endpoint will not draw in the right spot
@@ -138,8 +145,7 @@ Task = React.createClass
   setUuid: (id, uuid, uuids) ->
     current_uuids = uuids ? @state.uuids.concat([id])
     current_uuid =  uuid ? @state.uuid + 1
-    @setState({uuids: current_uuids})
-    @setState({uuid: current_uuid})
+    @setState({uuids: current_uuids, uuid: current_uuid})
 
   # Get a unique uuid for an answer based on its position in the answer list
   getUuid: (idx, uuid = @state.uuid, uuids = @state.uuids) ->
@@ -165,11 +171,8 @@ Task = React.createClass
     @setState({endpoints: eps})
     @setState({uuids: current_uuids})
 
-  # when the node is removed clean up all endpoints
-  componentWillUnmount: ->
-    for ep in @state.endpoints
-      @props.jp.deleteEndpoint(ep)
-    return
+  # define functions to handel chaning of data
+  #==================================
 
   # Callback for name change
   onName: (e) ->
@@ -245,6 +248,9 @@ Task = React.createClass
   onReq: (e) ->
     @setState({required: e.target.checked}, @workflowUpdate)
 
+  # define functions to handel moving and resizing
+  #=====================================
+
   # Make sure element being dragged is on top layer
   onDrag: (e) ->
     if @state.zIndex < max_z
@@ -286,6 +292,9 @@ Task = React.createClass
   # Useful for debugging
   onClick: (e) ->
     #console.log(@)
+
+  # defind functions to render each type of task
+  #===================================
 
   # How to draw a Question (single) task
   renderSingle: ->
