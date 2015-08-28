@@ -195,7 +195,7 @@ Task = React.createClass
     str.replace(/^\s+|\s+$/g, '').length == 0
 
   # Callback to add a new answer to the list
-  handelAdd: (e) ->
+  onAdd: (e) ->
     if not @isEmptyStr(@state.answer_text)
       current_answers = @state.answers.concat([@state.answer_text])
       if @state.type == 'drawing'
@@ -206,7 +206,7 @@ Task = React.createClass
         @setState({answers: current_answers, number: current_answers.length, answer_text: ''}, @workflowUpdate)
 
   # Callback to remove an asnwer from the list
-  handelRemove: (e) ->
+  onRemove: (e) ->
     idx = +e.target.getAttribute('data-idx')
     current_answers = @state.answers
     current_answers.splice(idx, 1)
@@ -315,7 +315,7 @@ Task = React.createClass
         zIndex: @state.zIndex
         endpoints: @state.endpoints
       taskInit: @state.task_init
-      remove: @handelRemove
+      remove: @onRemove
       edit: @onEdit
       number: @state.task_number
 
@@ -331,7 +331,7 @@ Task = React.createClass
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
       <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
+      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
     </div>
 
   # How to draw a Question (multiple) task
@@ -348,7 +348,7 @@ Task = React.createClass
         set: @setUuid
         get: @getUuid
       taskInit: @state.task_init
-      remove: @handelRemove
+      remove: @onRemove
       edit: @onEdit
       number: @state.task_number
 
@@ -364,7 +364,7 @@ Task = React.createClass
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <RequireBox setReq={@onReq} required={@state.required} />
       <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
+      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
     </div>
 
   # How to draw a Drawing task
@@ -388,7 +388,7 @@ Task = React.createClass
       tools: @state.draw_types
       colors: @state.draw_colors
       taskInit: @state.task_init
-      remove: @handelRemove
+      remove: @onRemove
       edit: @onEdit
       number: @state.task_number
       editDrawType: @onEditDrawType
@@ -405,7 +405,7 @@ Task = React.createClass
       <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
       <HelpButton help={@state.help_text} setHelp={@onHelp} />
       <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@handelAdd} number={@state.task_number} />
+      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
       <TypeColorSelect  onDrawType={@onDrawType} onDrawColor={@onDrawColor} drawType={@state.draw_type} drawColor={@state.draw_color} />
     </div>
 
