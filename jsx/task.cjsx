@@ -136,6 +136,10 @@ Task = React.createClass
     if not @state.task_init
       @props.onUpdate(@state)
 
+  # check if a string is just whitespace
+  isEmptyStr: (str) ->
+    str.replace(/^\s+|\s+$/g, '').length == 0
+
   # define some setters and getters
   #==========================
 
@@ -171,8 +175,8 @@ Task = React.createClass
     @setState({endpoints: eps})
     @setState({uuids: current_uuids})
 
-  # define functions to handel chaning of data
-  #==================================
+  # define functions to take care of chaning of data
+  #======================================
 
   # Callback for name change
   onName: (e) ->
@@ -189,10 +193,6 @@ Task = React.createClass
   # Callback for new drawing task color
   onDrawColor: (e) ->
     @setState({draw_color: e.target.value})
-
-  # check if a string is just whitespace
-  isEmptyStr: (str) ->
-    str.replace(/^\s+|\s+$/g, '').length == 0
 
   # Callback to add a new answer to the list
   onAdd: (e) ->
@@ -248,8 +248,8 @@ Task = React.createClass
   onReq: (e) ->
     @setState({required: e.target.checked}, @workflowUpdate)
 
-  # define functions to handel moving and resizing
-  #=====================================
+  # define functions to take care of moving and resizing
+  #=========================================
 
   # Make sure element being dragged is on top layer
   onDrag: (e) ->
