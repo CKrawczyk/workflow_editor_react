@@ -183,6 +183,29 @@ Task = React.createClass
       max_z = @state.zIndex
     style
 
+  # get props to pass to AnswerList
+  getInputs: ->
+    inputs =
+      type: @state.type
+      answers: @state.answers
+      uuid:
+        set: @setUuid
+        get: @getUuid
+      taskInit: @state.task_init
+      remove: @onRemove
+      edit: @onEdit
+      number: @state.task_number
+    if @state.type != 'multiple'
+      inputs['eps'] =
+        add: @pushEps
+        remove: @removeEps
+        zIndex: @state.zIndex
+        endpoints: @state.endpoints
+    if @state.type == 'drawing'
+      inputs['tools'] = @state.draw_types
+      inputs['colors'] = @state.draw_colors
+    inputs
+
   # define functions to take care of chaning data
   #====================================
 
@@ -291,47 +314,25 @@ Task = React.createClass
   onClick: (e) ->
     #console.log(@)
 
-  # defind functions to render each type of task
+  # defind function to render each type of task
   #===================================
-
-  getInputs: ->
-    inputs =
-      type: @state.type
-      answers: @state.answers
-      uuid:
-        set: @setUuid
-        get: @getUuid
-      taskInit: @state.task_init
-      remove: @onRemove
-      edit: @onEdit
-      number: @state.task_number
-    if @state.type != 'multiple'
-      inputs['eps'] =
-        add: @pushEps
-        remove: @removeEps
-        zIndex: @state.zIndex
-        endpoints: @state.endpoints
-    if @state.type == 'drawing'
-      inputs['tools'] = @state.draw_types
-      inputs['colors'] = @state.draw_colors
-    inputs
 
   # Draw task
   render: ->
     # the things that change based on task type
+    box_class = 'box '
+    required_box = <RequireBox onChange={@onChange} required={@state.required} />
+    type_color_select = <TypeColorSelect  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
     switch @props.type
       when 'single'
-        box_class = 'box question-box'
-        required_box = <RequireBox onChange={@onChange} required={@state.required} />
+        box_class += 'question-box'
         type_color_select = undefined
       when 'multiple'
-        box_class = 'box multi-box'
-        required_box = <RequireBox onChange={@onChange} required={@state.required} />
+        box_class += 'multi-box'
         type_color_select = undefined
       when 'drawing'
-        box_class = 'box drawing-box'
+        box_class += 'drawing-box'
         required_box = undefined
-        type_color_select = <TypeColorSelect  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
 
     inputs = @getInputs()
     <div className={box_class} style={@getStyle()} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
