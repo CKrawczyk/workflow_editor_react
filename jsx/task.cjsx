@@ -175,24 +175,31 @@ Task = React.createClass
     @setState({endpoints: eps})
     @setState({uuids: current_uuids})
 
-  # define functions to take care of chaning of data
-  #======================================
+  # get css style to use
+  getStyle: ->
+    style = @props.pos
+    style['zIndex'] = @state.zIndex
+    if @state.zIndex > max_z
+      max_z = @state.zIndex
+    style
 
-  # Callback for name change
-  onName: (e) ->
-    @setState({question: e.target.value}, @workflowUpdate)
+  # define functions to take care of chaning data
+  #====================================
 
-  # Callback for new answer change
-  onChange: (e) ->
-    @setState({answer_text: e.target.value})
-
-  # Callback for new drawing task type
-  onDrawType: (e) ->
-    @setState({draw_type: e.target.value})
-
-  # Callback for new drawing task color
-  onDrawColor: (e) ->
-    @setState({draw_color: e.target.value})
+  # Callback to take care of simple state changes
+  onChange: (k, wf_update, e) ->
+    # k is the state key to change
+    # if wf_update is true add the wrokflowUpdate callback
+    # e is the change event
+    to_change = {}
+    if e.target.type == 'checkbox'
+      to_change[k] = e.target.checked
+    else
+      to_change[k] = e.target.value
+    if wf_update
+      @setState(to_change, @workflowUpdate)
+    else
+      @setState(to_change)
 
   # Callback to add a new answer to the list
   onAdd: (e) ->
@@ -219,34 +226,25 @@ Task = React.createClass
     else
       @setState({answers: current_answers, number: current_answers.length}, @workflowUpdate)
 
-  # Callback when help text is changed
-  onHelp: (e) ->
-    @setState({help_text: e.target.value}, @workflowUpdate)
-
-  # Callback when answer/tool text is edited
-  onEdit: (e) ->
-    current_answers = @state.answers
+  # Callback when answer/tool is edited
+  onEdit: () ->
+    k = arguments[0]
+    # need to check how many arguments it was called with
+    # TypeColorSelect hard codes the key that changes, but also passes 3 arguments
+    # The event is always last in the argument list
+    if arguments.length == 2
+      e = arguments[1]
+    else
+      # This is TypeColorSelect calling onEdit
+      # add an 's' to the end of k to get the correct state key
+      k += 's'
+      e = arguments[2]
+    current = @state[k]
     idx = +e.target.getAttribute('data-idx')
-    current_answers[idx] = e.target.value
-    @setState({answers: current_answers}, @workflowUpdate)
-
-  # Callback when drawing task type is edited
-  onEditDrawType: (e) ->
-    current_draw_types = @state.draw_types
-    idx = +e.target.getAttribute('data-idx')
-    current_draw_types[idx] = e.target.value
-    @setState({draw_types: current_draw_types}, @workflowUpdate)
-
-  # Callback when drawing task color is edited
-  onEditDrawColor: (e) ->
-    current_draw_colors = @state.draw_colors
-    idx = +e.target.getAttribute('data-idx')
-    current_draw_colors[idx] = e.target.value
-    @setState({draw_colors: current_draw_colors}, @workflowUpdate)
-
-  # Callback when "required" box is toggled
-  onReq: (e) ->
-    @setState({required: e.target.checked}, @workflowUpdate)
+    current[idx] = e.target.value
+    to_change = {}
+    to_change[k] = current
+    @setState(to_change, @workflowUpdate)
 
   # define functions to take care of moving and resizing
   #=========================================
@@ -296,125 +294,61 @@ Task = React.createClass
   # defind functions to render each type of task
   #===================================
 
-  # How to draw a Question (single) task
-  renderSingle: ->
-    style = @props.pos
-    style['zIndex'] = @state.zIndex
-    if @state.zIndex > max_z
-      max_z = @state.zIndex
-
+  getInputs: ->
     inputs =
       type: @state.type
       answers: @state.answers
       uuid:
         set: @setUuid
         get: @getUuid
-      eps:
+      taskInit: @state.task_init
+      remove: @onRemove
+      edit: @onEdit
+      number: @state.task_number
+    if @state.type != 'multiple'
+      inputs['eps'] =
         add: @pushEps
         remove: @removeEps
         zIndex: @state.zIndex
         endpoints: @state.endpoints
-      taskInit: @state.task_init
-      remove: @onRemove
-      edit: @onEdit
-      number: @state.task_number
+    if @state.type == 'drawing'
+      inputs['tools'] = @state.draw_types
+      inputs['colors'] = @state.draw_colors
+    inputs
 
-    <div className='box question-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
-      <div className='drag-handel'>
-        <span className='box-head noselect'>
-          Single {'(sub)' if @state.subTask}
-        </span>
-        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
-        <br />
-      </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
-      <HelpButton help={@state.help_text} setHelp={@onHelp} />
-      <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
-    </div>
-
-  # How to draw a Question (multiple) task
-  renderMulti: ->
-    style = @props.pos
-    style['zIndex'] = @state.zIndex
-    if @state.zIndex > max_z
-      max_z = @state.zIndex
-
-    inputs =
-      type: @state.type
-      answers: @state.answers
-      uuid:
-        set: @setUuid
-        get: @getUuid
-      taskInit: @state.task_init
-      remove: @onRemove
-      edit: @onEdit
-      number: @state.task_number
-
-    <div className='box multi-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick}>
-      <div className='drag-handel'>
-        <span className='box-head noselect'>
-          Multiple {'(sub)' if @state.subTask}
-        </span>
-        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
-        <br />
-      </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
-      <HelpButton help={@state.help_text} setHelp={@onHelp} />
-      <RequireBox setReq={@onReq} required={@state.required} />
-      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
-    </div>
-
-  # How to draw a Drawing task
-  renderDraw: ->
-    style = @props.pos
-    style['zIndex'] = @state.zIndex
-    if @state.zIndex > max_z
-      max_z = @state.zIndex
-
-    inputs =
-      type: @state.type
-      answers: @state.answers
-      uuid:
-        set: @setUuid
-        get: @getUuid
-      eps:
-        add: @pushEps
-        remove: @removeEps
-        zIndex: @state.zIndex
-        endpoints: @state.endpoints
-      tools: @state.draw_types
-      colors: @state.draw_colors
-      taskInit: @state.task_init
-      remove: @onRemove
-      edit: @onEdit
-      number: @state.task_number
-      editDrawType: @onEditDrawType
-      editDrawColor: @onEditDrawColor
-
-    <div className='box drawing-box' style={style} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
-      <div className='drag-handel'>
-        <span className='box-head noselect'>
-          Drawing
-        </span>
-        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
-        <br />
-      </div>
-      <TaskName nameMe={@onName} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
-      <HelpButton help={@state.help_text} setHelp={@onHelp} />
-      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
-      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
-      <TypeColorSelect  onDrawType={@onDrawType} onDrawColor={@onDrawColor} drawType={@state.draw_type} drawColor={@state.draw_color} />
-    </div>
-
-  # Pick what task to draw
+  # Draw task
   render: ->
+    # the things that change based on task type
     switch @props.type
-      when 'single' then return @renderSingle()
-      when 'multiple' then return @renderMulti()
-      when 'drawing' then return @renderDraw()
+      when 'single'
+        box_class = 'box question-box'
+        required_box = <RequireBox onChange={@onChange} required={@state.required} />
+        type_color_select = undefined
+      when 'multiple'
+        box_class = 'box multi-box'
+        required_box = <RequireBox onChange={@onChange} required={@state.required} />
+        type_color_select = undefined
+      when 'drawing'
+        box_class = 'box drawing-box'
+        required_box = undefined
+        type_color_select = <TypeColorSelect  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
+
+    inputs = @getInputs()
+    <div className={box_class} style={@getStyle()} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
+      <div className='drag-handel'>
+        <span className='box-head noselect'>
+          {@state.type.charAt(0).toUpperCase() + @state.type.substr(1)}
+        </span>
+        <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
+        <br />
+      </div>
+      <TaskName onChange={@onChange} question={@state.question} number={@props.taskNumber} plumbId={@props.plumbId} />
+      <HelpButton help={@state.help_text} onChange={@onChange} />
+      {required_box}
+      <AnswerList jp={@props.jp} inputs={inputs} plumbId={@props.plumbId} />
+      <AddAnswer boxState={@state} change={@onChange} add={@onAdd} number={@state.task_number} />
+      {type_color_select}
+    </div>
 #
 
 StartEndNode = React.createClass

@@ -21,7 +21,7 @@ TaskName = React.createClass
     style =
       'zIndex': 'inherit'
     <div className='task' id={@props.plumbId + '_name'}>
-      <Input className='question' type='textarea' onChange={@props.nameMe} value={@props.question} addonBefore={task_number} style={style} />
+      <Input className='question' type='textarea' onChange={@props.onChange.bind(@, 'question', true)} value={@props.question} addonBefore={task_number} style={style} />
     </div>
 #
 
@@ -45,7 +45,7 @@ HelpButton = React.createClass
         </Row>
         <Row>
           <Col xs={6}>
-            <Input className='help-text' type='textarea' onChange={@props.setHelp} rows=5 value={@props.help} />
+            <Input className='help-text' type='textarea' onChange={@props.onChange.bind(@, 'help_text', true)} rows=5 value={@props.help} />
           </Col>
           <Col xs={6}>
             <div className='help-preview' dangerouslySetInnerHTML={{__html: md.render(@props.help)}}></div>
@@ -65,7 +65,7 @@ RequireBox = React.createClass
 
   render: ->
     <span className='req'>
-      <Input className='required-check'  type='checkbox' onChange={@props.setReq} checked={@props.required} label='Required' bsSize='small' />
+      <Input className='required-check'  type='checkbox' onChange={@props.onChange.bind(@, 'required', true)} checked={@props.required} label='Required' bsSize='small' />
     </span>
 #
 
@@ -79,7 +79,7 @@ AddAnswer = React.createClass
     style =
       'zIndex': 'inherit'
     <div className='answer-add'>
-      <Input className='answer-input' type='textarea' value={@props.boxState.answer_text} onChange={@props.change} addonBefore={before} buttonAfter={button} style={style} />
+      <Input className='answer-input' type='textarea' value={@props.boxState.answer_text} onChange={@props.change.bind(@, 'answer_text', false)} addonBefore={before} buttonAfter={button} style={style} />
     </div>
 #
 
@@ -98,7 +98,7 @@ TypeColorSelect = React.createClass
       s2 = {}
     <Row className='select-row'>
       <Col xs={6} className='type-select' style={s1}>
-        <Input type='select' onChange={@props.onDrawType} value={@props.drawType} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, 'draw_type', false)} value={@props.drawType} data-idx={@props.idx}>
           <option value='point'>point</option>
           <option value='line'>line</option>
           <option value='polygon'>polygon</option>
@@ -108,7 +108,7 @@ TypeColorSelect = React.createClass
         </Input>
       </Col>
       <Col xs={6} className='color-select' style={s2}>
-        <Input type='select' onChange={@props.onDrawColor} value={@props.drawColor} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, 'draw_color', false)} value={@props.drawColor} data-idx={@props.idx}>
           <option value='red'>red</option>
           <option value='yellow'>yellow</option>
           <option value='green'>green</option>

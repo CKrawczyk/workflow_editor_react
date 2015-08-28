@@ -55,14 +55,14 @@ AnswerItem = React.createClass
     if @props.inputs.type == 'drawing'
       overlay =
         <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={123.2} arrowOffsetLeft={-11}>
-          <Input className='help-text' type='textarea' onChange={@props.inputs.edit} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
-          <TypeColorSelect nopad=true onDrawType={@props.inputs.editDrawType} onDrawColor={@props.inputs.editDrawColor} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
+          <Input className='help-text' type='textarea' onChange={@props.inputs.edit.bind(@, 'answers')} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
+          <TypeColorSelect nopad=true onChange={@props.inputs.edit} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
     else
       overlay =
         <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={101.2} arrowOffsetLeft={-11}>
-          <Input className='help-text' type='textarea' onChange={@props.inputs.edit} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
+          <Input className='help-text' type='textarea' onChange={@props.inputs.edit.bind(@, 'answers')} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
 
@@ -130,8 +130,8 @@ AnswerList = React.createClass
     if @props.inputs.type == 'drawing'
       inputs.tool = @props.inputs.tools[idx]
       inputs.color = @props.inputs.colors[idx]
-      inputs.editDrawType = @props.inputs.editDrawType
-      inputs.editDrawColor = @props.inputs.editDrawColor
+      #inputs.editDrawType = @props.inputs.editDrawType
+      #inputs.editDrawColor = @props.inputs.editDrawColor
 
     <AnswerItem jp={@props.jp} key={'AI_' + idx} inputs={inputs} eps={@props.inputs.eps} />
 
