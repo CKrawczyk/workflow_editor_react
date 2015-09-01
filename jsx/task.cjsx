@@ -338,7 +338,7 @@ Task = React.createClass
     <div className={box_class} style={@getStyle()} id={@props.plumbId} ref={@props.plumbId} onClick={@onClick} >
       <div className='drag-handel'>
         <span className='box-head noselect'>
-          {@state.type.charAt(0).toUpperCase() + @state.type.substr(1)}
+          {@state.type.charAt(0).toUpperCase() + @state.type.substr(1)} {'(sub)' if @state.subTask}
         </span>
         <a className='close close-box noselect' onClick={@props.remove} data-wfkey={@props.wfKey}>&times;</a>
         <br />
