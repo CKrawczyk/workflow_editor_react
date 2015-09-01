@@ -211,6 +211,12 @@ Workflow = React.createClass
       init = @state.init
     @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
 
+  # set sub-task callback
+  onSubTask: (targetId, val) ->
+    targetId = targetId.split('_')
+    target_key = 'T' + targetId[1]
+    @refs[target_key].setSubTask(val)
+
   # New task callback
   onNewSingle: (e) ->
     @makeNewTask('single')
@@ -236,6 +242,8 @@ Workflow = React.createClass
       return
     if e.targetId != 'end'
       @refs[target_key]['previousTask'] = source_key
+    if @refs[source_key].state.subTask
+      @refs[target_key].setSubTask(true, @onSubTask)
     switch current_wf[source_key].type
       when 'single'
         adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
@@ -246,7 +254,7 @@ Workflow = React.createClass
       else
         # for drawing tasks with sub task
         if sourceId.length == 4
-          @refs[target_key].setState({subTask: true})
+          @refs[target_key].setSubTask(true, @onSubTask)
           sub_task_list = [target_key]
           adx = @refs[source_key].state.uuids.indexOf(e.sourceId)
           current_wf[source_key].tools[adx]['details'] = sub_task_list
@@ -256,8 +264,6 @@ Workflow = React.createClass
           else
             current_wf[source_key]['next'] = target_key
     @setState({wf: current_wf}, @getWorkflow)
-    if @refs[source_key].state.subTask and @refs[source_key].state.type == 'single'
-      console.log(@refs[source_key].state.uuids)
     return
 
   onDetach: (e) ->
@@ -268,7 +274,7 @@ Workflow = React.createClass
     current_wf = @state.wf
     if (e.targetId != 'end') and (@refs[target_key])
       @refs[target_key]['previousTask'] = null
-      @refs[target_key].setState({subTask: false})
+      @refs[target_key].setSubTask(false, @onSubTask)
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
       return

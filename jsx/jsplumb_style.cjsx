@@ -14,6 +14,7 @@ connectorPaintStyle =
   joinstyle: "round"
   outlineColor: "white"
   outlineWidth: 1.5
+  dashstyle: "1 0"
 
 connectorPaintStyleDashed =
   lineWidth: 3

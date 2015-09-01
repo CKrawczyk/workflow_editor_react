@@ -206,6 +206,35 @@ Task = React.createClass
       inputs['colors'] = @state.draw_colors
     inputs
 
+  # set/un-set a sub-task flag
+  setSubTask: (val, callback) ->
+    if @state.type == 'drawing'
+      # drawing tasks can't be sub-tasks
+      return
+    # don't do anything if the state does not change
+    if val != @state.subTask
+      if val
+        # set the draw style for the endpiont and connections
+        for ep in @state.endpoints[1..]
+          ep.connectorStyle = Sty.commonA_open.connectorStyle
+          ep.setPaintStyle(Sty.commonA_open.paintStyle)
+          ep.setHoverPaintStyle(Sty.commonA_open.hoverPaintStyle)
+          # set style for any connectors already drawn
+          for con in ep.connections
+            con.setPaintStyle(Sty.commonA_open.connectorStyle)
+            callback(con.targetId, val)
+      else
+        # set the draw style for the endpiont and connections
+        for ep in @state.endpoints[1..]
+          ep.connectorStyle = Sty.commonA.connectorStyle
+          ep.setPaintStyle(Sty.commonA.paintStyle)
+          ep.setHoverPaintStyle(Sty.commonA.hoverPaintStyle)
+          # set style for any connectors already drawn
+          for con in ep.connections
+            con.setPaintStyle(Sty.commonA.connectorStyle)
+            callback(con.targetId, val)
+      @setState({subTask: val})
+
   # define functions to take care of chaning data
   #====================================
 
