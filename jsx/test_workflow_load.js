@@ -93,12 +93,10 @@ exports.wf = {
     'required': false,
     'answers': [
       {
-        'label': 'fun',
-        'next': 'T7'
+        'label': 'fun'
       },
       {
-        'label': 'not fun',
-        'next': 'T7'
+        'label': 'not fun'
       }
     ]
   },
