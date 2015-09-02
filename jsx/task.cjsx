@@ -215,24 +215,32 @@ Task = React.createClass
     if val != @state.subTask
       if val
         # set the draw style for the endpiont and connections
-        for ep in @state.endpoints[1..]
+        @state.endpoints[0]._jsPlumb.maxConnections = 1
+        # do this loop backwards so disconnects happen first
+        for ep, idx in @state.endpoints[1..] by -1
           ep.connectorStyle = Sty.commonA_open.connectorStyle
           ep.setPaintStyle(Sty.commonA_open.paintStyle)
           ep.setHoverPaintStyle(Sty.commonA_open.hoverPaintStyle)
+          if idx > 0
+            @props.jp.detachAllConnections(ep.elementId)
+            ep.setVisible(false)
           # set style for any connectors already drawn
           for con in ep.connections
             con.setPaintStyle(Sty.commonA_open.connectorStyle)
-            callback(con.targetId, val)
+            callback?(con.targetId, val)
       else
         # set the draw style for the endpiont and connections
-        for ep in @state.endpoints[1..]
+        @state.endpoints[0]._jsPlumb.maxConnections = -1
+        for ep, idx in @state.endpoints[1..]
           ep.connectorStyle = Sty.commonA.connectorStyle
           ep.setPaintStyle(Sty.commonA.paintStyle)
           ep.setHoverPaintStyle(Sty.commonA.hoverPaintStyle)
           # set style for any connectors already drawn
+          if idx > 0
+            ep.setVisible(true)
           for con in ep.connections
             con.setPaintStyle(Sty.commonA.connectorStyle)
-            callback(con.targetId, val)
+            callback?(con.targetId, val)
       @setState({subTask: val})
 
   # define functions to take care of chaning data
@@ -341,7 +349,7 @@ Task = React.createClass
 
   # Useful for debugging
   onClick: (e) ->
-    #console.log(@)
+    console.log(@)
 
   # defind function to render each type of task
   #===================================

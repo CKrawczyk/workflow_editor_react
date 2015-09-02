@@ -71,6 +71,7 @@ Workflow = React.createClass
       c = ['start', @state.uuids[idx]]
       @props.jp.connect({uuids: c})
     last_list = []
+    sub_list = []
     for wfKey,w of @state.wf
       idx = @state.keys.indexOf(wfKey)
       switch w.type
@@ -92,6 +93,7 @@ Workflow = React.createClass
           if w.type == 'drawing'
             for a,adx in w.tools
               if a.details?.length > 0
+                sub_list = sub_list.concat(a.details)
                 [st1, ..., st_last] = a.details
                 last_list.push(st_last)
                 ndx_sub = @state.uuids[@state.keys.indexOf(st1)]
@@ -103,6 +105,9 @@ Workflow = React.createClass
       all_uuids = @refs[wfKey].state.uuids
       for ep in @refs[wfKey].state.endpoints[1...]
         @props.jp.detachAllConnections(ep.elementId)
+    # set all sub-tasks as such (callbacks not hooked up yet)
+    for wfKey in sub_list
+      @refs[wfKey].setSubTask(true)
     @props.jp.bind('connection', @onConnect)
     @props.jp.bind('connectionDetached', @onDetach)
     @getWorkflow()
@@ -233,6 +238,12 @@ Workflow = React.createClass
     # make sure updates to tasks are updated in state.wf!!!
     sourceId = e.sourceId.split('_')
     targetId = e.targetId.split('_')
+    # jsPlumb double fires events for some reason, check for that
+    if @lastConnect == e.sourceId + e.targetId
+      return
+    @lastConnect = e.sourceId + e.targetId
+    if @lastConnect == @lastDetach
+      @lastDetach = ''
     source_key = 'T' + sourceId[1]
     target_key = 'T' + targetId[1]
     current_wf = @state.wf
@@ -241,7 +252,10 @@ Workflow = React.createClass
       @refs[target_key]['previousTask'] = 'start'
       return
     if e.targetId != 'end'
-      @refs[target_key]['previousTask'] = source_key
+      if @refs[target_key]['previousTask']?
+        @refs[target_key]['previousTask'].push(source_key)
+      else
+        @refs[target_key]['previousTask'] = [source_key]
     if @refs[source_key].state.subTask
       @refs[target_key].setSubTask(true, @onSubTask)
     switch current_wf[source_key].type
@@ -269,12 +283,25 @@ Workflow = React.createClass
   onDetach: (e) ->
     sourceId = e.sourceId.split('_')
     targetId = e.targetId.split('_')
+    # jsPlumb double fires events for some reason, check for that
+    if @lastDetach == e.sourceId + e.targetId
+      return
+    @lastDetach = e.sourceId + e.targetId
+    if @lastDetach == @lastConnect
+      @lastConnect = ''
     source_key = 'T' + sourceId[1]
     target_key = 'T' + targetId[1]
     current_wf = @state.wf
-    if (e.targetId != 'end') and (@refs[target_key])
-      @refs[target_key]['previousTask'] = null
-      @refs[target_key].setSubTask(false, @onSubTask)
+    if (e.targetId != 'end') and (@refs[target_key]?)
+      if (@refs[target_key]['previousTask'] == 'start') or (@refs[target_key]['previousTask'].length? == 1)
+        @refs[target_key]['previousTask'] = null
+      else
+        tdx = @refs[target_key]['previousTask'].indexOf(source_key)
+        @refs[target_key]['previousTask'].splice(tdx, 1)
+      isSubTask = false
+      for pt in @refs[target_key]['previousTask']
+        isSubTask = isSubTask or @refs[pt].state.subTask
+      @refs[target_key].setSubTask(isSubTask, @onSubTask)
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
       return

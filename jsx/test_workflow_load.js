@@ -54,7 +54,7 @@ exports.wf = {
         'label': 'CAT!',
         'type': 'point',
         'color': 'red',
-        'details': ['T6', 'T7']
+        'details': ['T6']
       }
     ]
   },
