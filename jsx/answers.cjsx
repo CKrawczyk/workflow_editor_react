@@ -56,7 +56,7 @@ AnswerItem = React.createClass
       overlay =
         <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={123.2} arrowOffsetLeft={-11}>
           <Input className='help-text' type='textarea' onChange={@props.inputs.edit.bind(@, 'answers')} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
-          <TypeColorSelect nopad=true onChange={@props.inputs.edit} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
+          <TypeColorSelect nopad=true edit={true} onChange={@props.inputs.edit} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
     else

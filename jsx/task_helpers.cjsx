@@ -88,6 +88,12 @@ TypeColorSelect = React.createClass
   dispalyName: 'TypeColorSelect'
 
   render: ->
+    if @props.edit
+      dt = 'draw_types'
+      dc = 'draw_colors'
+    else
+      dt = 'draw_type'
+      dc = 'draw_color'
     if @props.nopad
       s1 =
         paddingLeft: 0
@@ -98,7 +104,7 @@ TypeColorSelect = React.createClass
       s2 = {}
     <Row className='select-row'>
       <Col xs={6} className='type-select' style={s1}>
-        <Input type='select' onChange={@props.onChange.bind(@, 'draw_type', false)} value={@props.drawType} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, dt, false)} value={@props.drawType} data-idx={@props.idx}>
           <option value='point'>point</option>
           <option value='line'>line</option>
           <option value='polygon'>polygon</option>
@@ -108,7 +114,7 @@ TypeColorSelect = React.createClass
         </Input>
       </Col>
       <Col xs={6} className='color-select' style={s2}>
-        <Input type='select' onChange={@props.onChange.bind(@, 'draw_color', false)} value={@props.drawColor} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, dc, false)} value={@props.drawColor} data-idx={@props.idx}>
           <option value='red'>red</option>
           <option value='yellow'>yellow</option>
           <option value='green'>green</option>

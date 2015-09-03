@@ -290,14 +290,11 @@ Task = React.createClass
   onEdit: () ->
     k = arguments[0]
     # need to check how many arguments it was called with
-    # TypeColorSelect hard codes the key that changes, but also passes 3 arguments
+    # TypeColorSelect passes 3 arguments
     # The event is always last in the argument list
     if arguments.length == 2
       e = arguments[1]
     else
-      # This is TypeColorSelect calling onEdit
-      # add an 's' to the end of k to get the correct state key
-      k += 's'
       e = arguments[2]
     current = @state[k]
     idx = +e.target.getAttribute('data-idx')
@@ -359,7 +356,7 @@ Task = React.createClass
     # the things that change based on task type
     box_class = 'box noselect '
     required_box = <RequireBox onChange={@onChange} required={@state.required} />
-    type_color_select = <TypeColorSelect  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
+    type_color_select = <TypeColorSelect edit={false}  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
     switch @props.type
       when 'single'
         box_class += 'question-box'
