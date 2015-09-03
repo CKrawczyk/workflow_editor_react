@@ -326,31 +326,35 @@ Workflow = React.createClass
   getWorkflow: ->
     #TODO change how sub-tasks are displayed in the final json
     #    Place (reformatted) sub-task json directly into drawing task
-    task_copy = (task, key_map) =>
+    task_copy = (task, key_map, task_state) =>
       switch task.type
         when 'single'
           answers_out = []
           for a in task.answers
             ans = {label: a.label}
-            if a.next
+            if a.next and not task_state.subTask
               ans['next'] = key_map[a.next]
             answers_out.push(ans)
-          {
+          output = {
             'question': task.question
             'help': task.help
             'type': task.type
-            'required': task.required
             'answers': answers_out
           }
+          if not task_state.subTask
+            output['required'] = task.required
+          output
         when 'multiple'
-          {
+          output = {
             'question': task.question
             'help': task.help
             'type': task.type
-            'next': key_map[task.next]
-            'required': task.required
             'answers': task.answers
           }
+          if not task_state.subTask
+            output['next'] = key_map[task.next]
+            output['required'] = task.required
+          output
         when 'drawing'
           tools_out = []
           for t in task.tools
@@ -392,10 +396,10 @@ Workflow = React.createClass
         left: @refs[k].me.offsetLeft + 'px'
         width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
-        wf['init'] = task_copy(@state.wf[k], key_map)
+        wf['init'] = task_copy(@state.wf[k], key_map, @refs[k].state)
         pos['init'] = p
       else
-        wf['T' + idx] = task_copy(@state.wf[k], key_map)
+        wf['T' + idx] = task_copy(@state.wf[k], key_map, @refs[k].state)
         pos['T' + idx] = p
     pos['start'] =
       top: @refs['start'].me.offsetTop + 'px'
