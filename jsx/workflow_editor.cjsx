@@ -324,6 +324,8 @@ Workflow = React.createClass
 
   # Construct workflow json from nodes
   getWorkflow: ->
+    #TODO change how sub-tasks are displayed in the final json
+    #    Place (reformatted) sub-task json directly into drawing task
     task_copy = (task, key_map) =>
       switch task.type
         when 'single'
@@ -416,6 +418,8 @@ Workflow = React.createClass
     @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
 
   loadWf: (wf_in, pos_in) ->
+    #TODO make sure sub-tasks are re-formed correctly
+    #   Extract each item in the sub-task list into its own task
     tdx = @state.uuid
     current_wf = {}
     current_pos = {}
@@ -476,7 +480,7 @@ Workflow = React.createClass
         <div style={{fontSize: 26}}> Add Task:</div>
         <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
       </Col>
-      <Col xs={12} id='editor' className='editor'>
+      <Col xs={12} id='editor' className='editor noselect'>
         <StartEndNode jp={@props.jp} type='start' ref='start' onMove={@getWorkflow} />
         <StartEndNode jp={@props.jp} type='end'  ref='end' onMove={@getWorkflow} />
         {@createTask(idx, name) for name, idx in @state.keys}

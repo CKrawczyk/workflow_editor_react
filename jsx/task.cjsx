@@ -357,7 +357,7 @@ Task = React.createClass
   # Draw task
   render: ->
     # the things that change based on task type
-    box_class = 'box '
+    box_class = 'box noselect '
     required_box = <RequireBox onChange={@onChange} required={@state.required} />
     type_color_select = <TypeColorSelect  onChange={@onChange} drawType={@state.draw_type} drawColor={@state.draw_color} />
     switch @props.type
@@ -438,7 +438,7 @@ StartEndNode = React.createClass
     switch @props.type
       when 'start' then style['left'] = '0%'
       when 'end' then style['right'] = '0%'
-    classString = 'box-end ' + @props.type
+    classString = 'box-end noselect ' + @props.type
     <div className={classString} id={@props.type} style={style}>
       {@props.type.charAt(0).toUpperCase() + @props.type.slice(1)}
     </div>
