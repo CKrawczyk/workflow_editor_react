@@ -326,13 +326,17 @@ Workflow = React.createClass
   getWorkflow: ->
     #TODO change how sub-tasks are displayed in the final json
     #    Place (reformatted) sub-task json directly into drawing task
-    task_copy = (task, key_map, task_state) =>
+    task_copy = (task, key_map, task_ref, sub_tasks_parent, k) =>
+      p =
+        top: task_ref.me.offsetTop + 'px'
+        left: task_ref.me.offsetLeft + 'px'
+        width: task_ref.me.offsetWidth + 'px'
       switch task.type
         when 'single'
           answers_out = []
           for a in task.answers
             ans = {label: a.label}
-            if a.next and not task_state.subTask
+            if a.next and not task_ref.state.subTask
               ans['next'] = key_map[a.next]
             answers_out.push(ans)
           output = {
@@ -340,8 +344,9 @@ Workflow = React.createClass
             'help': task.help
             'type': task.type
             'answers': answers_out
+            'pos': p
           }
-          if not task_state.subTask
+          if not task_ref.state.subTask
             output['required'] = task.required
           output
         when 'multiple'
@@ -350,8 +355,9 @@ Workflow = React.createClass
             'help': task.help
             'type': task.type
             'answers': task.answers
+            'pos': p
           }
-          if not task_state.subTask
+          if not task_ref.state.subTask
             output['next'] = key_map[task.next]
             output['required'] = task.required
           output
@@ -364,6 +370,7 @@ Workflow = React.createClass
               color: t.color
             }
             if t.details?
+              sub_tasks_parent.push(key_map[k])
               target_key = t.details[0]
               sub_task_list = [key_map[target_key]]
               while target_key != 'end'
@@ -384,23 +391,34 @@ Workflow = React.createClass
             'type': task.type
             'next': key_map[task.next]
             'tools': tools_out
+            'pos': p
           }
     wf = {}
     pos = {}
     key_map = {}
+    sub_tasks_parent = []
     for k, idx in @state.keys
       key_map[k] = 'T' + idx
     for k, idx in @state.keys
-      p =
-        top: @refs[k].me.offsetTop + 'px'
-        left: @refs[k].me.offsetLeft + 'px'
-        width: @refs[k].me.offsetWidth + 'px'
+      #p =
+      #  top: @refs[k].me.offsetTop + 'px'
+      #  left: @refs[k].me.offsetLeft + 'px'
+      #  width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
-        wf['init'] = task_copy(@state.wf[k], key_map, @refs[k].state)
-        pos['init'] = p
+        wf['init'] = task_copy(@state.wf[k], key_map, @refs[k], sub_tasks_parent, k)
+        #pos['init'] = p
       else
-        wf['T' + idx] = task_copy(@state.wf[k], key_map, @refs[k].state)
-        pos['T' + idx] = p
+        wf['T' + idx] = task_copy(@state.wf[k], key_map, @refs[k], sub_tasks_parent, k)
+        #pos['T' + idx] = p
+    # replace references to sub-tasks with the approprate JSON
+    for stp in sub_tasks_parent
+      for t in wf[stp].tools
+        if t.details
+          det = []
+          for st in t.details
+            det.push(wf[st])
+            delete wf[st]
+          t.details = det
     pos['start'] =
       top: @refs['start'].me.offsetTop + 'px'
       left: @refs['start'].me.offsetLeft + 'px'
