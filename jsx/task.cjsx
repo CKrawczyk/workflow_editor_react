@@ -99,7 +99,11 @@ Task = React.createClass
       stop: @props.onMove
     @props.jp.draggable(@props.plumbId, drag_options)
     # add an "input" endpoint
-    ep = @props.jp.addEndpoint(@props.plumbId, Sty.commonT, {uuid: @props.plumbId})
+    if @state.type == 'drawing'
+      # drawing task input is scopped such that sub-task nodes can't be connected to it
+      ep = @props.jp.addEndpoint(@props.plumbId, Sty.commonT_draw, {uuid: @props.plumbId})
+    else
+      ep = @props.jp.addEndpoint(@props.plumbId, Sty.commonT, {uuid: @props.plumbId})
     ep.canvas.style['z-index'] = @state.task_number + 1
     eps = [ep]
     # make sure answer endpoints are drawn *after* the div is draggable and has its endpoint

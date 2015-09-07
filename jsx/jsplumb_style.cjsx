@@ -39,6 +39,7 @@ commonA =
   connectorStyle: connectorPaintStyle
   hoverPaintStyle: endpointHoverStyle
   connectorHoverStyle: connectorHoverStyle
+  scope: 'normal'
   paintStyle:
     fillStyle: "#000"
     radius: 5
@@ -58,6 +59,7 @@ commonA_open =
   connectorStyle: connectorPaintStyleDashed
   hoverPaintStyle: endpointHoverStyle
   connectorHoverStyle: connectorHoverStyle
+  scope: 'sub'
   paintStyle:
     fillStyle: "transparent"
     strokeStyle: "#000"
@@ -71,6 +73,22 @@ commonT =
   maxConnections: -1
   hoverPaintStyle: endpointHoverStyle
   connectorHoverStyle: connectorHoverStyle
+  scope: 'normal sub'
+  dropOptions:
+    hoverClass: "hover"
+    activeClass: "active"
+  paintStyle:
+    fillStyle: "#000"
+    radius: 7
+
+commonT_draw =
+  anchor: "Left"
+  isTarget: true
+  endpoint: "Dot"
+  maxConnections: -1
+  hoverPaintStyle: endpointHoverStyle
+  connectorHoverStyle: connectorHoverStyle
+  scope: 'normal'
   dropOptions:
     hoverClass: "hover"
     activeClass: "active"
@@ -82,3 +100,4 @@ module.exports =
   commonA: commonA
   commonA_open: commonA_open
   commonT: commonT
+  commonT_draw: commonT_draw
