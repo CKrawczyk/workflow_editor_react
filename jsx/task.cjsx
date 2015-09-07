@@ -418,8 +418,8 @@ StartEndNode = React.createClass
       pos =
         left: pos.left + ''
         top: pos.top + ''
-    @me.style.left = if pos.left[-2..] == 'px' then pos.left else pos.left + 'px'
-    @me.style.top = if pos.top[-2..] == 'px' then pos.top else pos.top + 'px'
+    @me.style.left = if pos.left[-2..] == 'px' or pos.left[-1] == '%' then pos.left else pos.left + 'px'
+    @me.style.top = if pos.top[-2..] == 'px' or pos.top[-1] == '%' then pos.top else pos.top + 'px'
     @props.jp.revalidate(@ep.elementId, null, true)
 
   onDrag: ->

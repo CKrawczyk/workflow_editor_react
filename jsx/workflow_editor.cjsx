@@ -431,7 +431,7 @@ Workflow = React.createClass
     @refs['end'].moveMe(null, true)
     @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
 
-  loadWf: (wf_in, pos_in) ->
+  loadWf: (wf_in) ->
     tdx = @state.uuid
     current_wf = {}
     current_pos = {}
@@ -486,8 +486,13 @@ Workflow = React.createClass
                   else
                     st['next'] = 'T' + tdx
               a.details = sub_task_list
-    current_pos['start'] = pos_in['start']
-    current_pos['end'] = pos_in['end']
+    p_max = 0
+    for k,v of current_wf
+      p_task = parseInt(v.pos.left) + parseInt(v.pos.width)
+      p_max = p_task if p_task > p_max
+    current_pos['end'] =
+      left: p_max + 100 + 'px'
+      top: '50%'
     new_state =
       wf: current_wf
       pos: current_pos
@@ -498,10 +503,10 @@ Workflow = React.createClass
     @setState(new_state, @componentDidMount)
 
   loadEx1: ->
-    @loadWf(clone(Ex1.wf), clone(Ex1.pos))
+    @loadWf(clone(Ex1.wf))
 
   loadEx2: ->
-    @loadWf(clone(Ex2.wf), clone(Ex2.pos))
+    @loadWf(clone(Ex2.wf))
 
   # Callback to make one task
   createTask: (idx, name) ->
@@ -547,9 +552,6 @@ Workflow = React.createClass
       </Col>
       <Col xs={6}>
         <pre> {JSON.stringify(@state.wf_out, undefined, 2)} </pre>
-      </Col>
-      <Col xs={6}>
-        <pre> {JSON.stringify(@state.pos_out, undefined, 2)} </pre>
       </Col>
     </Row>
 #
