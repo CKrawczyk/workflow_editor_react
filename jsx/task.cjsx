@@ -346,7 +346,7 @@ Task = React.createClass
 
   # Useful for debugging
   onClick: (e) ->
-    console.log(@)
+    #console.log(@)
 
   # defind function to render each type of task
   #===================================

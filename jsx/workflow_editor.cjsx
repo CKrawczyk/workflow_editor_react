@@ -5,6 +5,7 @@ Row = require 'react-bootstrap/lib/Row'
 Col = require 'react-bootstrap/lib/Col'
 Ex1 = require './test_workflow_load.js'
 Ex2 = require './test_workflow_load_gz.js'
+Ex3 = require './test_workflow_no_pos.js'
 Tasks = require './task.cjsx'
 Task = Tasks.Task
 StartEndNode = Tasks.StartEndNode
@@ -439,6 +440,7 @@ Workflow = React.createClass
     current_keys = []
     key_dict = {}
     init = undefined
+    ct = 0
     for k,v of wf_in
       new_key = 'T' + tdx
       key_dict[k] = new_key
@@ -446,7 +448,9 @@ Workflow = React.createClass
       current_wf[new_key] = v
       if v.type == 'drawing'
         current_wf[new_key]['question'] = current_wf[new_key]['instruction']
-      current_pos[new_key] = wf_in[k].pos
+      top = if ct%2==0 then '0px' else '300px'
+      current_pos[new_key] = wf_in[k].pos ? {top: top, left: 150 + ct * 250 + 'px', width: '200px'}
+      ct += 1
       current_uuids.push('task_' + tdx)
       if k == 'init'
         init = new_key
@@ -478,7 +482,9 @@ Workflow = React.createClass
                 current_uuids.push('task_' + tdx)
                 st['required'] = false
                 current_wf[new_key] = st
-                current_pos[new_key] = st.pos
+                top = if ct%2==0 then '0px' else '300px'
+                current_pos[new_key] = st.pos ? {top: top, left: 150 + ct * 250 + 'px', width: '200px'}
+                ct += 1
                 tdx +=1
                 if a.details[sdx+1]?
                   if st.type == 'single'
@@ -487,8 +493,8 @@ Workflow = React.createClass
                     st['next'] = 'T' + tdx
               a.details = sub_task_list
     p_max = 0
-    for k,v of current_wf
-      p_task = parseInt(v.pos.left) + parseInt(v.pos.width)
+    for k,v of current_pos
+      p_task = parseInt(v.left) + parseInt(v.width)
       p_max = p_task if p_task > p_max
     current_pos['end'] =
       left: p_max + 100 + 'px'
@@ -507,6 +513,9 @@ Workflow = React.createClass
 
   loadEx2: ->
     @loadWf(clone(Ex2.wf))
+
+  loadEx3: ->
+    @loadWf(clone(Ex3.wf))
 
   # Callback to make one task
   createTask: (idx, name) ->
@@ -541,16 +550,19 @@ Workflow = React.createClass
           <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
         </ul>
       </Col>
-      <Col xs={3}>
+      <Col xs={2}>
         <Button onClick={@loadEx1}> Load example 1 </Button>
       </Col>
-      <Col xs={3}>
+      <Col xs={2}>
         <Button onClick={@loadEx2}> Load example 2 </Button>
       </Col>
-      <Col xs={3}>
+      <Col xs={2}>
+        <Button onClick={@loadEx3}> Load example 3 </Button>
+      </Col>
+      <Col xs={2}>
         <Button onClick={@onClear}> Clear </Button>
       </Col>
-      <Col xs={6}>
+      <Col xs={8}>
         <pre> {JSON.stringify(@state.wf_out, undefined, 2)} </pre>
       </Col>
     </Row>
