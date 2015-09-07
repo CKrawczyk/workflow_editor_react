@@ -2,7 +2,6 @@ exports.wf = {
   'init': {
     'question': 'Is it a cat or bacon?',
     'help': 'Some help text\nWritten in _markdown_ :D',
-    'required': true,
     'type': 'single',
     'answers': [
       {
@@ -13,7 +12,13 @@ exports.wf = {
         'label': 'bacon',
         'next': 'T2'
       }
-    ]
+    ],
+    'pos': {
+      'top': '215px',
+      'left': '165px',
+      'width': '196px'
+    },
+    'required': true
   },
   'T1': {
     'question': 'Is it cute?',
@@ -28,7 +33,12 @@ exports.wf = {
         'label': 'no',
         'next': 'T3'
       }
-    ]
+    ],
+    'pos': {
+      'top': '93px',
+      'left': '443px',
+      'width': '196px'
+    }
   },
   'T2': {
     'question': 'Will you eat it?',
@@ -43,7 +53,12 @@ exports.wf = {
         'label': 'no',
         'next': 'T4'
       }
-    ]
+    ],
+    'pos': {
+      'top': '381px',
+      'left': '443px',
+      'width': '196px'
+    }
   },
   'T3': {
     'instruction': 'Click the cat',
@@ -54,9 +69,33 @@ exports.wf = {
         'label': 'CAT!',
         'type': 'point',
         'color': 'red',
-        'details': ['T6']
+        'details': [
+          {
+            'question': 'sub_task_2',
+            'help': '',
+            'type': 'single',
+            'answers': [
+              {
+                'label': 'fun'
+              },
+              {
+                'label': 'not fun'
+              }
+            ],
+            'pos': {
+              'top': '146px',
+              'left': '1083px',
+              'width': '200px'
+            }
+          }
+        ]
       }
-    ]
+    ],
+    'pos': {
+      'top': '11px',
+      'left': '737px',
+      'width': '248px'
+    }
   },
   'T4': {
     'instruction': 'Click the bacon',
@@ -67,52 +106,51 @@ exports.wf = {
         'label': 'BACON!',
         'type': 'point',
         'color': 'green',
-        'details': ['T5', 'T7']
+        'details': [
+          {
+            'question': 'sub_task_1',
+            'help': '',
+            'type': 'multiple',
+            'answers': [
+              {
+                'label': 'fun'
+              },
+              {
+                'label': 'not fun'
+              }
+            ],
+            'pos': {
+              'top': '604px',
+              'left': '1085px',
+              'width': '200px'
+            }
+          },
+          {
+            'question': 'sub_task_3',
+            'help': '',
+            'type': 'multiple',
+            'answers': [
+              {
+                'label': 'crap'
+              },
+              {
+                'label': 'bubbles'
+              }
+            ],
+            'pos': {
+              'top': '570px',
+              'left': '1462px',
+              'width': '200px'
+            }
+          }
+        ]
       }
-    ]
-  },
-  'T5': {
-    'question': 'sub_task_1',
-    'help': '',
-    'type': 'multiple',
-    'next': 'T7',
-    'required': false,
-    'answers': [
-      {
-        'label': 'fun'
-      },
-      {
-        'label': 'not fun'
-      }
-    ]
-  },
-  'T6': {
-    'question': 'sub_task_2',
-    'help': '',
-    'type': 'single',
-    'required': false,
-    'answers': [
-      {
-        'label': 'fun'
-      },
-      {
-        'label': 'not fun'
-      }
-    ]
-  },
-  'T7': {
-    'question': 'sub_task_3',
-    'help': '',
-    'type': 'multiple',
-    'required': false,
-    'answers': [
-      {
-        'label': 'crap'
-      },
-      {
-        'label': 'bubbles'
-      }
-    ]
+    ],
+    'pos': {
+      'top': '400px',
+      'left': '736px',
+      'width': '248px'
+    }
   }
 }
 

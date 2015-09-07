@@ -2,7 +2,6 @@ exports.wf = {
   'init': {
     'question': 'Is the galaxy smooth or does it have a disk?',
     'help': '',
-    'required': true,
     'type': 'single',
     'answers': [
       {
@@ -16,7 +15,13 @@ exports.wf = {
       {
         'label': 'Star'
       }
-    ]
+    ],
+    'pos': {
+      'top': '113px',
+      'left': '169px',
+      'width': '238px'
+    },
+    'required': true
   },
   'T1': {
     'question': 'Could this be edge-on?',
@@ -31,7 +36,12 @@ exports.wf = {
         'label': 'No',
         'next': 'T6'
       }
-    ]
+    ],
+    'pos': {
+      'top': '356px',
+      'left': '459px',
+      'width': '208px'
+    }
   },
   'T2': {
     'question': 'What is the shape of the bulge?',
@@ -50,7 +60,12 @@ exports.wf = {
         'label': 'None',
         'next': 'T3'
       }
-    ]
+    ],
+    'pos': {
+      'top': '393px',
+      'left': '1482px',
+      'width': '196px'
+    }
   },
   'T3': {
     'question': 'Anything odd?',
@@ -64,7 +79,12 @@ exports.wf = {
       {
         'label': 'No'
       }
-    ]
+    ],
+    'pos': {
+      'top': '385px',
+      'left': '2730px',
+      'width': '196px'
+    }
   },
   'T4': {
     'question': 'What is odd?',
@@ -92,7 +112,12 @@ exports.wf = {
       {
         'label': 'Dust lane'
       }
-    ]
+    ],
+    'pos': {
+      'top': '11px',
+      'left': '3140px',
+      'width': '196px'
+    }
   },
   'T5': {
     'question': 'How rounded is it?',
@@ -111,7 +136,12 @@ exports.wf = {
         'label': 'Cigar',
         'next': 'T3'
       }
-    ]
+    ],
+    'pos': {
+      'top': '1px',
+      'left': '1479px',
+      'width': '196px'
+    }
   },
   'T6': {
     'question': 'Is there a bar?',
@@ -126,7 +156,12 @@ exports.wf = {
         'label': 'No',
         'next': 'T7'
       }
-    ]
+    ],
+    'pos': {
+      'top': '525px',
+      'left': '737px',
+      'width': '196px'
+    }
   },
   'T7': {
     'question': 'Are there spiral arms?',
@@ -141,7 +176,12 @@ exports.wf = {
         'label': 'No',
         'next': 'T10'
       }
-    ]
+    ],
+    'pos': {
+      'top': '826px',
+      'left': '997px',
+      'width': '196px'
+    }
   },
   'T8': {
     'question': 'How tight are they?',
@@ -160,7 +200,12 @@ exports.wf = {
         'label': 'Loose',
         'next': 'T9'
       }
-    ]
+    ],
+    'pos': {
+      'top': '659px',
+      'left': '1265px',
+      'width': '196px'
+    }
   },
   'T9': {
     'question': 'How many arms?',
@@ -191,7 +236,12 @@ exports.wf = {
         'label': "Can't tell",
         'next': 'T10'
       }
-    ]
+    ],
+    'pos': {
+      'top': '741px',
+      'left': '1842px',
+      'width': '215px'
+    }
   },
   'T10': {
     'question': 'How big is the bulge?',
@@ -214,7 +264,12 @@ exports.wf = {
         'label': 'Dominant',
         'next': 'T3'
       }
-    ]
+    ],
+    'pos': {
+      'top': '1045px',
+      'left': '2209px',
+      'width': '236px'
+    }
   }
 }
 

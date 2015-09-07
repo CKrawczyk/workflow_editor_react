@@ -220,7 +220,7 @@ Workflow = React.createClass
   onSubTask: (targetId, val) ->
     targetId = targetId.split('_')
     target_key = 'T' + targetId[1]
-    @refs[target_key].setSubTask(val)
+    @refs[target_key].setSubTask(val, @onSubTask)
 
   # New task callback
   onNewSingle: (e) ->
@@ -300,7 +300,7 @@ Workflow = React.createClass
         @refs[target_key]['previousTask'].splice(tdx, 1)
       isSubTask = false
       for pt in @refs[target_key]['previousTask']
-        isSubTask = isSubTask or @refs[pt].state.subTask
+        isSubTask = isSubTask or @refs[pt]?.state.subTask
       @refs[target_key].setSubTask(isSubTask, @onSubTask)
     if e.sourceId == 'start'
       @setState({init: undefined}, @getWorkflow)
@@ -324,8 +324,6 @@ Workflow = React.createClass
 
   # Construct workflow json from nodes
   getWorkflow: ->
-    #TODO change how sub-tasks are displayed in the final json
-    #    Place (reformatted) sub-task json directly into drawing task
     task_copy = (task, key_map, task_ref, sub_tasks_parent, k) =>
       p =
         top: task_ref.me.offsetTop + 'px'
@@ -400,16 +398,10 @@ Workflow = React.createClass
     for k, idx in @state.keys
       key_map[k] = 'T' + idx
     for k, idx in @state.keys
-      #p =
-      #  top: @refs[k].me.offsetTop + 'px'
-      #  left: @refs[k].me.offsetLeft + 'px'
-      #  width: @refs[k].me.offsetWidth + 'px'
       if k == @state.init
         wf['init'] = task_copy(@state.wf[k], key_map, @refs[k], sub_tasks_parent, k)
-        #pos['init'] = p
       else
         wf['T' + idx] = task_copy(@state.wf[k], key_map, @refs[k], sub_tasks_parent, k)
-        #pos['T' + idx] = p
     # replace references to sub-tasks with the approprate JSON
     for stp in sub_tasks_parent
       for t in wf[stp].tools
@@ -440,8 +432,6 @@ Workflow = React.createClass
     @setState({wf: current_wf, pos: current_pos, keys: current_keys, uuids: current_uuids, init: init}, @getWorkflow)
 
   loadWf: (wf_in, pos_in) ->
-    #TODO make sure sub-tasks are re-formed correctly
-    #   Extract each item in the sub-task list into its own task
     tdx = @state.uuid
     current_wf = {}
     current_pos = {}
@@ -456,8 +446,7 @@ Workflow = React.createClass
       current_wf[new_key] = v
       if v.type == 'drawing'
         current_wf[new_key]['question'] = current_wf[new_key]['instruction']
-        #delete current_wf[new_key].instruction
-      current_pos[new_key] = pos_in[k]
+      current_pos[new_key] = wf_in[k].pos
       current_uuids.push('task_' + tdx)
       if k == 'init'
         init = new_key
@@ -472,8 +461,31 @@ Workflow = React.createClass
           v.next = key_dict[v.next]
         if v.type == 'drawing'
           for a in v.tools
+            # extract subtask json list as tasks
             if a.details?
-              a.details = (key_dict[sub_t] for sub_t in a.details)
+              sub_task_list = []
+              for st, sdx in a.details
+                new_key = 'T' + tdx
+                # make sure nothing is overwritten
+                k_key = new_key
+                kdx = tdx
+                while k_key in key_dict
+                  kdx += 1
+                  k_key = 'T' + kdx
+                key_dict[k_key] = new_key
+                current_keys.push(new_key)
+                sub_task_list.push(new_key)
+                current_uuids.push('task_' + tdx)
+                st['required'] = false
+                current_wf[new_key] = st
+                current_pos[new_key] = st.pos
+                tdx +=1
+                if a.details[sdx+1]?
+                  if st.type == 'single'
+                    st['answers'][0]['next'] = 'T' + tdx
+                  else
+                    st['next'] = 'T' + tdx
+              a.details = sub_task_list
     current_pos['start'] = pos_in['start']
     current_pos['end'] = pos_in['end']
     new_state =
