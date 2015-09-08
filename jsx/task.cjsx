@@ -77,6 +77,8 @@ Task = React.createClass
   # grab values needed for resize and move events
   # hook up resize and move events
   componentDidMount: ->
+    # Track connected nodes
+    @nextTask = []
     # set up some variables to use during resize events
     @me = React.findDOMNode(this)
     @width_min = parseFloat(window.getComputedStyle(@me)['min-width'])
@@ -350,7 +352,7 @@ Task = React.createClass
 
   # Useful for debugging
   onClick: (e) ->
-    #console.log(@)
+    console.log(@)
 
   # defind function to render each type of task
   #===================================

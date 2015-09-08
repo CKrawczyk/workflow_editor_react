@@ -253,10 +253,13 @@ Workflow = React.createClass
       @refs[target_key]['previousTask'] = 'start'
       return
     if e.targetId != 'end'
+      @refs[source_key]['nextTask'].push(target_key)
       if @refs[target_key]['previousTask']?
         @refs[target_key]['previousTask'].push(source_key)
       else
         @refs[target_key]['previousTask'] = [source_key]
+    else
+      @refs[source_key]['nextTask'].push('end')
     if @refs[source_key].state.subTask
       @refs[target_key].setSubTask(true, @onSubTask)
     switch current_wf[source_key].type
@@ -293,6 +296,16 @@ Workflow = React.createClass
     source_key = 'T' + sourceId[1]
     target_key = 'T' + targetId[1]
     current_wf = @state.wf
+    # update nextTask list
+    if @refs[source_key]?
+      if (e.sourceId != 'start')
+        if (e.targetId != 'end')
+          tdx = @refs[source_key]['nextTask'].indexOf(target_key)
+          @refs[source_key]['nextTask'].splice(tdx,1)
+        else
+          tdx = @refs[source_key]['nextTask'].indexOf('end')
+          @refs[source_key]['nextTask'].splice(tdx,1)
+    # update previouseTask list
     if (e.targetId != 'end') and (@refs[target_key]?)
       if (@refs[target_key]['previousTask'] == 'start') or (@refs[target_key]['previousTask'].length? == 1)
         @refs[target_key]['previousTask'] = null
@@ -322,6 +335,56 @@ Workflow = React.createClass
               delete current_wf[source_key]['next']
       @setState({wf: current_wf}, @getWorkflow)
     return
+
+  doSort: (task_map, t, D) ->
+    for i in task_map[t]
+      msg = i + ' ' + D[i] + ' ,' + D[t]
+      if (i not of D) or (D[i] <= D[t])
+        D[i] = D[t] + 1
+      @doSort(task_map, i, D)
+
+  # function to auto-position nodes
+  onSort: ->
+    if @state.init
+      task_map ={end: []}
+      for k in @state.keys
+        task_map[k] = remove_dup(@refs[k].nextTask)
+        if task_map[k].length == 0
+          # make sure end node is sorted to the far right
+          task_map[k] = ['end']
+      start = @state.init
+      D = {}
+      D[@state.init] = 0
+      @doSort(task_map, start, D)
+      levels = {}
+      for k,v of D
+        if levels[v]?
+          levels[v].push(k)
+        else
+          levels[v] = [k]
+      posX = 150
+      for i in [0...Object.keys(levels).length]
+        max_width = 0
+        posY = 20
+        for t in levels[i]
+          # set the position
+          @refs[t].me.style.left = posX + 'px'
+          @refs[t].me.style.top = posY + 'px'
+          # calculate new y position
+          posY += @refs[t].me.offsetHeight + 20
+          # redraw nodes after the move
+          if t == 'end'
+            @props.jp.revalidate(@refs[t].ep.elementId, null, true)
+          else
+            @props.jp.revalidate(@refs[t].state.endpoints[0].elementId, null, true)
+          # calculate next x position
+          w = @refs[t].me.offsetWidth
+          if w > max_width
+            max_width = w
+        posX += 50 + max_width
+    else
+      console.log('start node must be hooked up to use sort')
+      return
 
   # Construct workflow json from nodes
   getWorkflow: ->
@@ -547,7 +610,8 @@ Workflow = React.createClass
           <li>Connect the tasks/answers with the next task by clicking and dragging the black dot to the right of the task/answer to the black dot on the left of the next task</li>
           <li>Remvoe tasks/answers/tools by clicking the "x"</li>
           <li>The Panoptes JSON for the workflow is automatically updated below (The positions of each task node on the page are also shown)</li>
-          <li>Click "Load example 1" or "Load example 2" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
+          <li>Click "Load example 1", "Load example 2", or "Load example 3" to see example workflows (make sure to click "clear" or refresh the page before loading an example)</li>
+          <li>Click "sort" or automatically place the nodes based on the current connections (start node must be hooked up for this to work)</li>
         </ul>
       </Col>
       <Col xs={2}>
@@ -562,6 +626,9 @@ Workflow = React.createClass
       <Col xs={2}>
         <Button onClick={@onClear}> Clear </Button>
       </Col>
+      <Col xs={2}>
+        <Button onClick={@onSort}> Sort </Button>
+      </Col>
       <Col xs={8}>
         <pre> {JSON.stringify(@state.wf_out, undefined, 2)} </pre>
       </Col>
@@ -571,7 +638,14 @@ Workflow = React.createClass
 # A function to clone JSON object
 clone = (obj) ->
   return JSON.parse(JSON.stringify(obj))
-#
+
+# A function to remove duplicates in an array
+remove_dup = (ar) ->
+  if ar.length == 0
+    return []
+  res = {}
+  res[ar[key]] = ar[key] for key in [0..ar.length-1]
+  value for key, value of res
 
 # need to make a new jsPlumb instance to work with
 jp = jsPlumb.getInstance()
