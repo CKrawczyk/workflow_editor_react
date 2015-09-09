@@ -15,12 +15,10 @@
     }
   },
   "dependencies": {
+    "babelify": "^6.3.0",
     "jquery": "^2.1.4",
     "jquery-ui": "^1.10.5",
-    "markdown-it": "^4.2.1",
-    "markdown-it-emoji": "^1.0.0",
-    "markdown-it-sub": "^1.0.0",
-    "markdown-it-sup": "^1.0.0",
+    "markdownz": "^2.1.0",
     "react": "^0.13.3",
     "react-bootstrap": "^0.22.0"
   },
@@ -30,11 +28,17 @@
     "coffee-reactify": "^3.0.0",
     "coffeeify": "^1.1.0",
     "stylus": "^0.51.1",
+    "uglify-js": "^2.4.24",
     "watchify": "^3.2.1"
   },
   "scripts": {
-    "build": "browserify --transform coffee-reactify --ignore-transform coffeeify jsx/workflow_editor.cjsx -o js/workflow_editor.js",
-    "watch": "watchify -t coffee-reactify jsx/workflow_editor.cjsx -o js/workflow_editor.js --debug --verbose",
+    "build-js": "browserify --transform coffee-reactify --ignore-transform coffeeify jsx/workflow_editor.cjsx -o js/workflow_editor.js",
+    "watch-js": "watchify -t coffee-reactify jsx/workflow_editor.cjsx -o js/workflow_editor.js --debug --verbose",
+    "build-css": "stylus --include-css --out css/workflow_editor.css css/workflow_editor_style.styl",
+    "watch-css": "stylus -w --include-css --out css/workflow_editor.css css/workflow_editor_style.styl",
+    "build": "npm run build-js && npm run build-css",
+    "watch": "npm run watch-js & npm run watch-css",
+    "min": "uglifyjs -cm -o js/workflow_editor.min.js js/workflow_editor.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Coleman Krawczyk",

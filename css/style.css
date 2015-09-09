@@ -99,7 +99,8 @@
 }
 
 .edit-popover {
-  width: 300px;
+  width: 450px;
+  max-width: 450px;
 }
 
 .editor {
@@ -128,7 +129,7 @@
 }
 
 .help-popover {
-  width: 700px;
+  width: 600px;
   max-width: 1200px;
 }
 

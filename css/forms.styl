@@ -1,0 +1,46 @@
+.form-label
+  @extends $generic-heading
+
+.auto-save
+  &[data-waiting]
+    background: rgba(gray, 0.05)
+
+  &[data-busy]
+    background-stripes: rgba(gray, 0.3), transparent, 1em
+    animation: busy-animation 1s linear infinite
+
+  &[data-success]
+    background: rgba(lime, 0.2)
+
+  &[data-error]
+    background: rgba(red, 0.2)
+
+.standard-input
+  border: 1px solid
+  border-radius: 2px
+  box-shadow: 1px 2px 5px -1px rgba(black, 0.2) inset
+  box-sizing: border-box
+  font: inherit
+  padding: 0.5em 1vw
+
+  &:disabled
+    opacity: 0.5
+
+  &.full
+    display: block
+    width: 100%
+
+.form-help
+  color: gray
+
+  &.info
+    font-style: italic
+
+  &.error
+    color: red
+
+  &.warning
+    color: orangered
+
+  &.success
+    color: green

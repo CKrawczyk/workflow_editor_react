@@ -293,17 +293,8 @@ Task = React.createClass
       @setState({answers: current_answers, number: current_answers.length}, @workflowUpdate)
 
   # Callback when answer/tool is edited
-  onEdit: () ->
-    k = arguments[0]
-    # need to check how many arguments it was called with
-    # TypeColorSelect passes 3 arguments
-    # The event is always last in the argument list
-    if arguments.length == 2
-      e = arguments[1]
-    else
-      e = arguments[2]
+  onEdit: (k, idx, e) ->
     current = @state[k]
-    idx = +e.target.getAttribute('data-idx')
     current[idx] = e.target.value
     to_change = {}
     to_change[k] = current

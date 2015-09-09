@@ -6,12 +6,7 @@ Popover = require 'react-bootstrap/lib/Popover'
 Sty = require './jsplumb_style.cjsx'
 Helpers = require './task_helpers.cjsx'
 TypeColorSelect = Helpers.TypeColorSelect
-MarkdownIt = require 'markdown-it'
-
-md = MarkdownIt({breaks: true, html: true})
-  .use(require 'markdown-it-emoji')
-  .use(require 'markdown-it-sub')
-  .use(require 'markdown-it-sup')
+{Markdown, MarkdownEditor} = require 'markdownz'
 
 # Styling for the answers within the list
 AnswerItem = React.createClass
@@ -54,24 +49,17 @@ AnswerItem = React.createClass
     # format the popup overlay
     if @props.inputs.type == 'drawing'
       overlay =
-        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={123.2} arrowOffsetLeft={-11}>
-          <Input className='help-text' type='textarea' onChange={@props.inputs.edit.bind(@, 'answers')} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
+        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={142} arrowOffsetLeft={-11}>
+          <MarkdownEditor className='help-text' rows={5} cols={70} value={@props.inputs.answer} onChange={@props.inputs.edit.bind(@, 'answers', @props.inputs.idx)} />
           <TypeColorSelect nopad=true edit={true} onChange={@props.inputs.edit} drawType={@props.inputs.tool} drawColor={@props.inputs.color} idx={@props.inputs.idx} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
     else
       overlay =
-        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={101.2} arrowOffsetLeft={-11}>
-          <Input className='help-text' type='textarea' onChange={@props.inputs.edit.bind(@, 'answers')} data-idx={@props.inputs.idx} rows=5 value={@props.inputs.answer} />
+        <Popover className='edit-popover' title='Edit Answer' arrowOffsetTop={121} arrowOffsetLeft={-11}>
+          <MarkdownEditor className='help-text' rows={5} cols={70} value={@props.inputs.answer} onChange={@props.inputs.edit.bind(@, 'answers', @props.inputs.idx)} />
           <Button onClick={closeMe} block>Save</Button>
         </Popover>
-
-    # make sure input text is not blank before converting markdown
-    if not @isEmptyStr(@props.inputs.text)
-      text = {__html: md.render(@props.inputs.text)}
-    else
-      # if input is just whitespace make sure something is rendered
-      text = {__html: '&nbsp;'}
 
     # format label
     if @props.inputs.type == 'drawing'
@@ -87,7 +75,7 @@ AnswerItem = React.createClass
       <OverlayTrigger ref={@props.inputs.refMe} trigger='click' placement='right' overlay={overlay}>
         <i className='fa fa-pencil edit-icon'></i>
       </OverlayTrigger>
-      <div className='lab' dangerouslySetInnerHTML={text}></div>
+      <Markdown className='lab'>{if @isEmptyStr(@props.inputs.text) then '&nbsp;' else @props.inputs.text}</Markdown>
     </li>
 #
 

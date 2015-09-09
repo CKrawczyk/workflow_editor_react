@@ -5,12 +5,7 @@ Popover = require 'react-bootstrap/lib/Popover'
 Row = require 'react-bootstrap/lib/Row'
 Col = require 'react-bootstrap/lib/Col'
 Button = require 'react-bootstrap/lib/Button'
-MarkdownIt = require 'markdown-it'
-
-md = MarkdownIt({breaks: true, html: true})
-  .use(require 'markdown-it-emoji')
-  .use(require 'markdown-it-sub')
-  .use(require 'markdown-it-sup')
+{Markdown, MarkdownEditor} = require 'markdownz'
 
 # Render the task name box at the top of the node
 TaskName = React.createClass
@@ -34,23 +29,9 @@ HelpButton = React.createClass
 
   render: ->
     overlay =
-      <Popover className='help-popover' title='Help text' arrowOffsetTop={121.1} arrowOffsetLeft={-11}>
-        <Row>
-          <Col xs={6}>
-            <h4>Enter help text as <a href='https://markdown-it.github.io/' target='_blank'>markdown</a></h4>
-          </Col>
-          <Col xs={6}>
-            <h4>Preview text as HTML</h4>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={6}>
-            <Input className='help-text' type='textarea' onChange={@props.onChange.bind(@, 'help_text', true)} rows=5 value={@props.help} />
-          </Col>
-          <Col xs={6}>
-            <div className='help-preview' dangerouslySetInnerHTML={{__html: md.render(@props.help)}}></div>
-          </Col>
-        </Row>
+      <Popover className='help-popover' title='Help text' arrowOffsetTop={140.9} arrowOffsetLeft={-11}>
+        <h4>Enter help text as <a href='https://markdown-it.github.io/' target='_blank'>markdown</a></h4>
+        <MarkdownEditor className='help-text' rows={5} cols={78} value={@props.help} onChange={@props.onChange.bind(@, 'help_text', true)} />
         <Button onClick={@closeHelp} block>Save</Button>
       </Popover>
 
@@ -91,9 +72,11 @@ TypeColorSelect = React.createClass
     if @props.edit
       dt = 'draw_types'
       dc = 'draw_colors'
+      val = @props.idx
     else
       dt = 'draw_type'
       dc = 'draw_color'
+      val = false
     if @props.nopad
       s1 =
         paddingLeft: 0
@@ -104,7 +87,7 @@ TypeColorSelect = React.createClass
       s2 = {}
     <Row className='select-row'>
       <Col xs={6} className='type-select' style={s1}>
-        <Input type='select' onChange={@props.onChange.bind(@, dt, false)} value={@props.drawType} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, dt, val)} value={@props.drawType} data-idx={@props.idx}>
           <option value='point'>point</option>
           <option value='line'>line</option>
           <option value='polygon'>polygon</option>
@@ -114,7 +97,7 @@ TypeColorSelect = React.createClass
         </Input>
       </Col>
       <Col xs={6} className='color-select' style={s2}>
-        <Input type='select' onChange={@props.onChange.bind(@, dc, false)} value={@props.drawColor} data-idx={@props.idx}>
+        <Input type='select' onChange={@props.onChange.bind(@, dc, val)} value={@props.drawColor} data-idx={@props.idx}>
           <option value='red'>red</option>
           <option value='yellow'>yellow</option>
           <option value='green'>green</option>
