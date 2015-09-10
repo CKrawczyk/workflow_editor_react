@@ -374,16 +374,10 @@ Workflow = React.createClass
         max_width = 0
         posY = 20
         for t in levels[i]
-          # set the position
-          @refs[t].me.style.left = posX + 'px'
-          @refs[t].me.style.top = posY + 'px'
+          # move the task div
+          @refs[t].moveMe({left: posX, top: posY})
           # calculate new y position
           posY += @refs[t].me.offsetHeight + 20
-          # redraw nodes after the move
-          if t == 'end'
-            @props.jp.revalidate(@refs[t].ep.elementId, null, true)
-          else
-            @props.jp.revalidate(@refs[t].state.endpoints[0].elementId, null, true)
           # calculate next x position
           w = @refs[t].me.offsetWidth
           if w > max_width

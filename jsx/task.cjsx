@@ -249,6 +249,12 @@ Task = React.createClass
             callback?(con.targetId, val)
       @setState({subTask: val})
 
+  # set postion
+  moveMe: (pos) ->
+    @me.style.left = pos.left + 'px'
+    @me.style.top = pos.top + 'px'
+    @props.jp.revalidate(@state.endpoints[0].elementId, null, true)
+
   # define functions to take care of chaning data
   #====================================
 
