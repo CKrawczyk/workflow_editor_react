@@ -1,6 +1,7 @@
 React = require 'react'
 Button = require 'react-bootstrap/lib/Button'
 ButtonGroup = require 'react-bootstrap/lib/ButtonGroup'
+ButtonToolbar = require 'react-bootstrap/lib/ButtonToolbar'
 Row = require 'react-bootstrap/lib/Row'
 Col = require 'react-bootstrap/lib/Col'
 Ex1 = require './test_workflow_load.js'
@@ -14,11 +15,17 @@ AddTaskButtons = React.createClass
   displayName: 'AddTaskButtons'
 
   render: ->
-    <ButtonGroup>
-      <Button onClick={@props.onSingle}>Question (single)</Button>
-      <Button onClick={@props.onMulti}>Question (multiple)</Button>
-      <Button onClick={@props.onDraw}>Drawing</Button>
-    </ButtonGroup>
+    <ButtonToolbar>
+      <ButtonGroup>
+        <Button onClick={@props.onSingle}>Question (single)</Button>
+        <Button onClick={@props.onMulti}>Question (multiple)</Button>
+        <Button onClick={@props.onDraw}>Drawing</Button>
+      </ButtonGroup>
+      <ButtonGroup>
+        <Button onClick={@props.onSort}>Sort</Button>
+        <Button onClick={@props.onClear}>Clear</Button>
+      </ButtonGroup>
+    </ButtonToolbar>
 #
 
 # Handel the full workflow
@@ -589,7 +596,7 @@ Workflow = React.createClass
     <Row>
       <Col xs={12} style={{marginTop: 15}}>
         <div style={{fontSize: 26}}> Add Task:</div>
-        <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} />
+        <AddTaskButtons onSingle={@onNewSingle} onMulti={@onNewMulti} onDraw={@onNewDraw} onSort={@onSort} onClear={@onClear} />
       </Col>
       <Col xs={12} id='editor' className='editor noselect'>
         <StartEndNode jp={@props.jp} type='start' ref='start' onMove={@getWorkflow} />
@@ -622,12 +629,6 @@ Workflow = React.createClass
       </Col>
       <Col xs={2}>
         <Button onClick={@loadEx3}> Load example 3 </Button>
-      </Col>
-      <Col xs={2}>
-        <Button onClick={@onClear}> Clear </Button>
-      </Col>
-      <Col xs={2}>
-        <Button onClick={@onSort}> Sort </Button>
       </Col>
       <Col xs={8}>
         <pre> {JSON.stringify(@state.wf_out, undefined, 2)} </pre>

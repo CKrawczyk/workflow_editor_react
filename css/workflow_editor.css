@@ -2696,6 +2696,32 @@ button.close {
 .markdown-editor-help {
   margin: 2em;
 }
+._jsPlumb_connector {
+  z-index: 0;
+}
+
+/** DISABLE TEXT SELECTION (SET ON BODY WHEN DRAGGING IS OCCURRING) **/
+._jsPlumb_drag_select * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+._jsPlumb_endpoint {
+  z-index:19;
+}
+
+._jsPlumb_overlay {
+  z-index:20;
+}
+
+path, ._jsPlumb_endpoint {
+  cursor: pointer;
+}
+
 .add-answer {
   height: 46px;
 }
@@ -2852,28 +2878,6 @@ button.close {
   padding-right: 6px;
 }
 
-._jsPlumb_connector {
-  z-index: 0;
-}
-
-/** DISABLE TEXT SELECTION (SET ON BODY WHEN DRAGGING IS OCCURRING) **/
-._jsPlumb_drag_select * {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-._jsPlumb_endpoint {
-  z-index:19;
-}
-
-._jsPlumb_overlay {
-  z-index:20;
-}
-
 .lab {
   padding: 0;
   margin: 0;
@@ -2899,10 +2903,6 @@ button.close {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-path, ._jsPlumb_endpoint {
-  cursor: pointer;
 }
 
 .question {
@@ -2950,13 +2950,5 @@ textarea.form-control {
 
 .ui-resizable-e {
   cursor: ew-resize;
-}
-
-.smooth {
-  background-position: 0 -3800px;
-  background: transparent url("http://static.zooniverse.org/www.galaxyzoo.org/images/workflow.png") no-repeat scroll left top;
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
 }
 
