@@ -469,12 +469,18 @@ Workflow = React.createClass
         wf['T' + idx] = task_copy(@state.wf[k], key_map, @refs[k], sub_tasks_parent, k)
     # replace references to sub-tasks with the approprate JSON
     for stp in sub_tasks_parent
+      if stp == @state.init
+        stp = 'init'
       for t in wf[stp].tools
         if t.details
           det = []
           for st in t.details
-            det.push(wf[st])
-            delete wf[st]
+            # make sure I don't double remove an object from wf
+            if typeof(st) is 'string'
+              det.push(wf[st])
+              delete wf[st]
+            else
+              det.push(st)
           t.details = det
     pos['start'] =
       top: @refs['start'].me.offsetTop + 'px'
