@@ -5,8 +5,7 @@ TaskName = Helpers.TaskName
 HelpButton = Helpers.HelpButton
 RequireBox = Helpers.RequireBox
 AddAnswer = Helpers.AddAnswer
-Answers = require './answers.cjsx'
-AnswerList = Answers.AnswerList
+AnswerList = require './answers.cjsx'
 TypeColorSelect = Helpers.TypeColorSelect
 $ = jQuery = require 'jquery'
 require 'jquery-ui/resizable'

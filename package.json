@@ -2,7 +2,7 @@
   "name": "workflow_editor_react",
   "version": "1.0.0",
   "description": "workfow editor for Panoptes writen using react",
-  "main": "js/worflow_editor.js",
+  "main": "js/workflow_editor.js",
   "coffeelintConfig": {
     "max_line_length": {
       "name": "max_line_length",

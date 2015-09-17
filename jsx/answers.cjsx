@@ -131,5 +131,4 @@ AnswerList = React.createClass
     </ul>
 #
 
-module.exports =
-  AnswerList: AnswerList
+module.exports = AnswerList
