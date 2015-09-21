@@ -28,3 +28,6 @@ node_modules
 
 # minified js
 js/workflow_editor.min.js
+
+# debug logs
+npm-debug.log*

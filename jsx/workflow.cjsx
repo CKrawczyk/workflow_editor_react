@@ -7,9 +7,7 @@ Col = require 'react-bootstrap/lib/Col'
 Ex1 = require './test_workflow_load.js'
 Ex2 = require './test_workflow_load_gz.js'
 Ex3 = require './test_workflow_no_pos.js'
-Tasks = require './task.cjsx'
-Task = Tasks.Task
-StartEndNode = Tasks.StartEndNode
+{Task, StartEndNode} = require './task.cjsx'
 
 AddTaskButtons = React.createClass
   displayName: 'AddTaskButtons'

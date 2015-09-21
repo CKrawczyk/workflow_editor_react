@@ -111,9 +111,10 @@ TypeColorSelect = React.createClass
     </Row>
 #
 
-module.exports =
-  TaskName: TaskName
-  HelpButton: HelpButton
-  RequireBox: RequireBox
-  AddAnswer: AddAnswer
-  TypeColorSelect: TypeColorSelect
+module.exports = {
+  TaskName
+  HelpButton
+  RequireBox
+  AddAnswer
+  TypeColorSelect
+}

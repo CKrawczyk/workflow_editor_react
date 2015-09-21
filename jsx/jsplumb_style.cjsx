@@ -96,8 +96,9 @@ commonT_draw =
     fillStyle: "#000"
     radius: 7
 
-module.exports =
-  commonA: commonA
-  commonA_open: commonA_open
-  commonT: commonT
-  commonT_draw: commonT_draw
+module.exports = {
+  commonA
+  commonA_open
+  commonT
+  commonT_draw
+}

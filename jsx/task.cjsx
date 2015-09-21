@@ -1,12 +1,7 @@
 React = require 'react'
 Sty = require './jsplumb_style.cjsx'
-Helpers = require './task_helpers.cjsx'
-TaskName = Helpers.TaskName
-HelpButton = Helpers.HelpButton
-RequireBox = Helpers.RequireBox
-AddAnswer = Helpers.AddAnswer
+{TaskName, HelpButton, RequireBox, AddAnswer, TypeColorSelect} =  require './task_helpers.cjsx'
 AnswerList = require './answers.cjsx'
-TypeColorSelect = Helpers.TypeColorSelect
 $ = jQuery = require 'jquery'
 require 'jquery-ui/resizable'
 
@@ -443,6 +438,7 @@ StartEndNode = React.createClass
     </div>
 #
 
-module.exports =
-  Task: Task
-  StartEndNode: StartEndNode
+module.exports = {
+  Task
+  StartEndNode
+}

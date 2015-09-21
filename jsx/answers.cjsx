@@ -4,8 +4,7 @@ Button = require 'react-bootstrap/lib/Button'
 OverlayTrigger = require 'react-bootstrap/lib/OverlayTrigger'
 Popover = require 'react-bootstrap/lib/Popover'
 Sty = require './jsplumb_style.cjsx'
-Helpers = require './task_helpers.cjsx'
-TypeColorSelect = Helpers.TypeColorSelect
+{TypeColorSelect} =  require './task_helpers.cjsx'
 {Markdown, MarkdownEditor} = require 'markdownz'
 
 # Styling for the answers within the list
