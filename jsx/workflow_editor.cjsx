@@ -3,6 +3,7 @@ Row = require 'react-bootstrap/lib/Row'
 Col = require 'react-bootstrap/lib/Col'
 Button = require 'react-bootstrap/lib/Button'
 Workflow = require './workflow.cjsx'
+jsPlumb = require 'jsPlumb'
 
 Page = React.createClass
   dispalyName: 'Page'
