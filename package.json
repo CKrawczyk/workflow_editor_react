@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "browserify": "^10.2.0",
+    "browserify-shim": "^3.8.10",
     "coffee-react-transform": "^3.2.0",
     "coffee-reactify": "^3.0.0",
     "coffeeify": "^1.1.0",
@@ -50,7 +51,14 @@
   },
   "browserify": {
     "transform": [
-      "coffeeify"
+      "coffeeify",
+      "browserify-shim"
     ]
+  },
+  "browser": {
+    "jsPlumb": "./node_modules/jsplumb/dist/js/jsPlumb-1.7.9.js"
+  },
+  "browserify-shim": {
+    "jsPlumb": "jsPlumb"
   }
 }
